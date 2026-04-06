@@ -460,18 +460,29 @@
     const btn    = document.getElementById('fb-auth-btn');
     const nameEl = document.getElementById('fb-user-name');
     const avatar = document.getElementById('fb-avatar');
-    if (!btn) return;
+    if (!btn) { setTimeout(_updateAuthUI, 100); return; }
     if (_uid) {
       btn.textContent = 'Sign Out';
+      btn.style.background = 'rgba(126,200,126,.15)';
+      btn.style.borderColor = 'var(--accent3)';
+      btn.style.color = 'var(--accent3)';
       btn.onclick = () => signOut(_auth);
       if (nameEl) nameEl.textContent = _displayName;
       if (avatar) { avatar.textContent = _displayName[0].toUpperCase(); avatar.style.display='flex'; }
     } else {
       btn.textContent = 'Sign In';
+      btn.style.background = 'rgba(93,184,232,.15)';
+      btn.style.borderColor = 'var(--accent)';
+      btn.style.color = 'var(--accent)';
       btn.onclick = () => { if (window._fbOpenModal) window._fbOpenModal(); };
       if (nameEl) nameEl.textContent = '';
       if (avatar) avatar.style.display = 'none';
     }
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _updateAuthUI);
+  } else {
+    _updateAuthUI();
   }
 
   function _closeAuthModal() { document.getElementById('fb-auth-modal')?.classList.add('hidden'); }
