@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+
+  <url>
+    <loc>https://www.flytora.com/</loc>
+
+    <image:image>
+      <image:loc>https://www.flytora.com/og-image.png</image:loc>
+      <image:title>Flytora – Free Typing Game</image:title>
+      <image:caption>Play the free online typing game Flytora. Type words to fly a bird through obstacles and improve your WPM.</image:caption>
+      <image:geo_location>Worldwide</image:geo_location>
+      <image:license>https://www.flytora.com/</image:license>
+    </image:image>
+
+    <image:image>
+      <image:loc>https://www.flytora.com/screenshot1.png</image:loc>
+      <image:title>Flytora Gameplay 1</image:title>
+      <image:caption>Flytora gameplay screenshot 1 – type words to fly a bird through obstacles.</image:caption>
+    </image:image>
+
+    <image:image>
+      <image:loc>https://www.flytora.com/screenshot2.png</image:loc>
+      <image:title>Flytora Gameplay 2</image:title>
+      <image:caption>Flytora gameplay screenshot 2 – Sprint mode showing high-speed word typing.</image:caption>
+    </image:image>
+
+    <image:image>
+      <image:loc>https://www.flytora.com/screenshot3.png</image:loc>
+      <image:title>Flytora Gameplay 3</image:title>
+      <image:caption>Flytora gameplay screenshot 3 – Survival mode with power-ups and combos.</image:caption>
+    </image:image>
+
+    <image:image>
+      <image:loc>https://www.flytora.com/logo.png</image:loc>
+      <image:title>Flytora Logo</image:title>
+      <image:caption>Official logo of Flytora, the free online typing game.</image:caption>
+    </image:image>
+
+  </url>
+
+</urlset>
