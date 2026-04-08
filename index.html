@@ -4767,6 +4767,29 @@ body {
 }
 
 </style>
+<!-- ═══ MONETIZATION NETWORK SCRIPTS ═══ -->
+<!-- Adcash lib (must be in head, as high as possible) -->
+<script id="aclib" type="text/javascript" src="//acscdn.com/script/aclib.js"></script>
+
+<!-- Monetag vignette (loads async, fires on demand) -->
+<script>
+window._monetagZone = '10850358';
+window._monetagLoaded = false;
+function _loadMonetagVignette(cb) {
+  if (window._monetagLoaded) { if(cb) cb(); return; }
+  var s = document.createElement('script');
+  s.src = 'https://n6wxm.com/vignette.min.js';
+  s.dataset.zone = window._monetagZone;
+  s.onload = function(){ window._monetagLoaded = true; if(cb) cb(); };
+  document.body.appendChild(s);
+}
+</script>
+
+<!-- Footer banner height CSS variable -->
+<style>
+:root { --footer-ad-h: 90px; }
+@media (max-width: 728px) { :root { --footer-ad-h: 50px; } }
+</style>
 <body>
 <!--Adcash-->
      <script type="text/javascript">
