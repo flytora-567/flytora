@@ -20126,5 +20126,214 @@ body.tf-debug #tf-sync-badge { display: block !important; }
 })();
 
 </script>
+<!-- ═══ FOOTER AD BAR ═══ -->
+<div id="ft-footer-ad-bar">
+  <div class="ft-ad-inner">
+    <div>
+      <script type="text/javascript">
+        aclib.runBanner({ zoneId: '11171250' });
+      </script>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ REWARDED AD CONSENT MODAL ═══ -->
+<div id="ft-rewarded-consent" class="hidden" role="dialog" aria-modal="true">
+  <div class="ft-consent-box">
+    <div class="ft-consent-icon" id="ftc-icon">📺</div>
+    <div class="ft-consent-title" id="ftc-title">Watch a Short Ad</div>
+    <div class="ft-consent-reward" id="ftc-reward" style="color:#5db8e8;">🪙 +80 Coins</div>
+    <div class="ft-consent-sub" id="ftc-sub">A short ad will open. Your reward is waiting on the other side.</div>
+    <button class="ft-consent-cta" id="ftc-cta">📺 Watch Ad & Claim Reward</button>
+    <div class="ft-consent-timer" id="ftc-timer"></div>
+    <button class="ft-consent-cancel" id="ftc-cancel">Maybe later</button>
+  </div>
+</div>
+
+<!-- ═══ MONETIZATION ENGINE CORE ═══ -->
+<script>
+(function() {
+  'use strict';
+
+  /* ────────────────────────────────────────────────────────────
+     FT MONETIZATION ENGINE v2.0
+     - Monetag Vignette:  consent-first rewarded flow
+     - Adcash Banner:     footer 728x90 (already rendered above)
+     - All existing playRewardedAd() calls auto-patched
+  ──────────────────────────────────────────────────────────── */
+
+  var _pendingCb    = null;
+  var _pendingLabel = null;
+  var _timerEl      = document.getElementById('ftc-timer');
+  var _ctaEl        = document.getElementById('ftc-cta');
+  var _cancelEl     = document.getElementById('ftc-cancel');
+  var _consentEl    = document.getElementById('ft-rewarded-consent');
+  var _iconEl       = document.getElementById('ftc-icon');
+  var _titleEl      = document.getElementById('ftc-title');
+  var _rewardEl     = document.getElementById('ftc-reward');
+  var _subEl        = document.getElementById('ftc-sub');
+
+  /* ── Canvas height correction for footer ad ── */
+  function _applyFooterOffset() {
+    var h   = window.innerHeight;
+    var adH = parseInt(getComputedStyle(document.documentElement)
+                .getPropertyValue('--footer-ad-h')) || 90;
+    var gameH = h - adH;
+
+    var cv = document.getElementById('game-canvas');
+    if (cv && cv.height !== gameH) {
+      cv.height = gameH;
+      cv.style.height = gameH + 'px';
+    }
+    if (window.G && window.G.bird && window.G.bird.y > gameH - 60) {
+      window.G.bird.y = gameH * 0.45;
+    }
+  }
+  window.addEventListener('resize', _applyFooterOffset);
+  _applyFooterOffset();
+
+  /* ── Consent modal ─────────────────────────────────────── */
+  function _openConsent(icon, title, rewardLabel, rewardColor, onConfirm, onCancel) {
+    if (_iconEl)   _iconEl.textContent   = icon;
+    if (_titleEl)  _titleEl.textContent  = title;
+    if (_rewardEl) {
+      _rewardEl.textContent = rewardLabel;
+      _rewardEl.style.color = rewardColor || '#5db8e8';
+    }
+    if (_subEl) _subEl.textContent = 'A short ad will open. Your reward waits on the other side.';
+    if (_timerEl) _timerEl.textContent = '';
+
+    _pendingCb    = onConfirm;
+    _pendingLabel = rewardLabel;
+
+    if (_consentEl) _consentEl.classList.remove('hidden');
+  }
+
+  function _closeConsent() {
+    if (_consentEl) _consentEl.classList.add('hidden');
+    _pendingCb = null;
+  }
+
+  /* ── Vignette trigger + return detection ──────────────── */
+  function _triggerVignette(onReturn) {
+    // Load script if not yet loaded, then rely on visibilitychange
+    // as the signal that the user returned (ad closed / timed out)
+    _loadMonetagVignette(function() {
+      // Give Monetag a tick to trigger the ad
+      setTimeout(function() {
+        // Listen for tab return
+        function _onReturn() {
+          document.removeEventListener('visibilitychange', _onVisChange);
+          window.removeEventListener('focus', _onFocus);
+          clearTimeout(_fallback);
+          if (onReturn) onReturn();
+        }
+        function _onVisChange() {
+          if (document.visibilityState === 'visible') _onReturn();
+        }
+        function _onFocus() { _onReturn(); }
+
+        document.addEventListener('visibilitychange', _onVisChange);
+        window.addEventListener('focus', _onFocus);
+
+        // Fallback: if nothing fires in 45s, just give reward
+        var _fallback = setTimeout(_onReturn, 45000);
+      }, 300);
+    });
+  }
+
+  /* ── CTA click handler ────────────────────────────────── */
+  if (_ctaEl) {
+    _ctaEl.addEventListener('click', function() {
+      var cb = _pendingCb;
+      _closeConsent();
+      if (!cb) return;
+
+      // Record ad watched
+      if (window.recordAdWatched) window.recordAdWatched();
+
+      // Trigger vignette then deliver reward on return
+      _triggerVignette(function() {
+        try { cb(); } catch(e) {}
+      });
+    });
+  }
+
+  if (_cancelEl) {
+    _cancelEl.addEventListener('click', function() { _closeConsent(); });
+  }
+  if (_consentEl) {
+    _consentEl.addEventListener('click', function(e) {
+      if (e.target === _consentEl) _closeConsent();
+    });
+  }
+
+  /* ── Map reward labels → UI config ───────────────────── */
+  var _rewardMap = [
+    { match:/coin/i,   icon:'🪙', color:'#e8c87a', title:'Earn Coins'      },
+    { match:/gem/i,    icon:'💎', color:'#9b7fd4', title:'Earn Gems'       },
+    { match:/spin/i,   icon:'🎰', color:'#e8a06a', title:'Lucky Spin'      },
+    { match:/chest/i,  icon:'📦', color:'#e8c87a', title:'Open Chest'      },
+    { match:/reviv/i,  icon:'🛡️', color:'#7ec87e', title:'Revive!'        },
+    { match:/double/i, icon:'×2', color:'#e8a06a', title:'Double Reward'   },
+    { match:/reward/i, icon:'🎁', color:'#5db8e8', title:'Claim Reward'    },
+  ];
+  function _resolveUI(label) {
+    for (var i = 0; i < _rewardMap.length; i++) {
+      if (_rewardMap[i].match.test(label)) return _rewardMap[i];
+    }
+    return { icon:'📺', color:'#5db8e8', title:'Watch Ad' };
+  }
+
+  /* ── PATCH: replace existing playRewardedAd globally ─── */
+  var _origPlayRewardedAd = window.playRewardedAd;
+
+  window.playRewardedAd = function ftPlayRewardedAd(rewardLabel, onComplete, onSkip) {
+    // Check daily cap (existing logic)
+    if (window.canWatchAd && !window.canWatchAd()) {
+      if (window.showToast) window.showToast('Daily ad limit reached! Come back tomorrow 🌅');
+      if (onSkip) onSkip();
+      return;
+    }
+
+    var ui = _resolveUI(rewardLabel || '');
+    _openConsent(
+      ui.icon, ui.title, rewardLabel || 'Reward', ui.color,
+      function() { if (onComplete) onComplete(); },
+      function() { if (onSkip) onSkip(); }
+    );
+  };
+
+  /* ── PATCH: showAd (used by btn-watch-ad flow) ──────── */
+  window.showAd = function ftShowAd(onComplete) {
+    window.playRewardedAd('🎁 Reward', onComplete);
+  };
+
+  /* ── Keyboard: Escape closes consent ─────────────────── */
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && _consentEl && !_consentEl.classList.contains('hidden')) {
+      _closeConsent();
+    }
+  });
+
+  /* ── Footer ad canvas size sync on game start ─────────── */
+  var _origSG = window.startGame;
+  window.startGame = function() {
+    if (_origSG) _origSG.apply(this, arguments);
+    requestAnimationFrame(_applyFooterOffset);
+    setTimeout(_applyFooterOffset, 200);
+  };
+
+  /* ── Cookie consent: keep above footer ad ─────────────── */
+  var _cookieBanner = document.getElementById('cookie-consent-banner');
+  if (_cookieBanner) {
+    var adH = parseInt(getComputedStyle(document.documentElement)
+                .getPropertyValue('--footer-ad-h')) || 90;
+    _cookieBanner.style.bottom = adH + 'px';
+  }
+
+  console.log('[FT Monetization v2.0] Monetag vignette + Adcash banner active.');
+})();
+</script>
 </body>
 </html>
