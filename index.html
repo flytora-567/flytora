@@ -847,6 +847,153 @@
   }
 
 </script>
+Replace existing CSS rules for .screen and game layout
+<!-- Add this STYLE block anywhere in <head> -->
+<style id="ft-footer-ad-styles">
+/* ── FOOTER AD BAR ───────────────────────────────────── */
+#ft-footer-ad-bar {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: var(--footer-ad-h);
+  z-index: 9980;
+  background: #040608;
+  border-top: 1px solid rgba(93,184,232,.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+#ft-footer-ad-bar .ft-ad-inner {
+  width: 100%;
+  max-width: 728px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── SHRINK ALL SCREENS ABOVE FOOTER AD ──────────────── */
+.screen {
+  bottom: var(--footer-ad-h) !important;
+  height: auto !important;
+  top: 0 !important;
+}
+#game-screen {
+  bottom: var(--footer-ad-h) !important;
+}
+#gameover-screen {
+  bottom: var(--footer-ad-h) !important;
+}
+#menu-screen {
+  bottom: var(--footer-ad-h) !important;
+}
+.menu-layout {
+  height: calc(100vh - var(--footer-ad-h)) !important;
+}
+
+/* mobile adjustments */
+@media (max-width: 768px) {
+  #type-input-area, #typing-area {
+    bottom: calc(var(--footer-ad-h) + .5rem) !important;
+  }
+  .toast {
+    bottom: calc(var(--footer-ad-h) + 1.5rem) !important;
+  }
+  #stash-bar {
+    bottom: calc(var(--footer-ad-h) + 8.2rem) !important;
+  }
+  #bot-hud {
+    bottom: calc(var(--footer-ad-h) + 8rem) !important;
+  }
+  #ach-popup {
+    bottom: calc(var(--footer-ad-h) + 4.5rem) !important;
+  }
+}
+
+/* ── REWARDED AD CONSENT MODAL ───────────────────────── */
+#ft-rewarded-consent {
+  position: fixed;
+  inset: 0;
+  z-index: 99990;
+  background: rgba(0,0,0,.88);
+  backdrop-filter: blur(18px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: ftConsentIn .25s cubic-bezier(.34,1.4,.64,1);
+}
+#ft-rewarded-consent.hidden { display: none !important; }
+@keyframes ftConsentIn {
+  from { opacity:0; transform:scale(.94); }
+  to   { opacity:1; transform:scale(1); }
+}
+.ft-consent-box {
+  background: linear-gradient(160deg,#0e1624 0%,#0a111c 100%);
+  border: 1px solid rgba(93,184,232,.22);
+  border-radius: 20px;
+  padding: 2.2rem 2rem 1.8rem;
+  width: min(380px,94vw);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 0 60px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.04) inset;
+  position: relative;
+  overflow: hidden;
+}
+.ft-consent-box::before {
+  content: '';
+  position: absolute; top:0; left:0; right:0; height:3px;
+  background: linear-gradient(90deg,#5db8e8,#9b7fd4,#7ec87e);
+  border-radius: 20px 20px 0 0;
+}
+.ft-consent-icon  { font-size: 2.8rem; line-height:1; }
+.ft-consent-title {
+  font-family: 'Cinzel',serif;
+  font-size: 1.05rem; font-weight:700;
+  color:#e0eaff; letter-spacing:.1em; text-align:center;
+}
+.ft-consent-reward {
+  font-family: 'DM Mono',monospace;
+  font-size: 1.3rem; font-weight:900;
+  letter-spacing:.04em; text-align:center;
+}
+.ft-consent-sub {
+  font-family: 'Raleway',sans-serif;
+  font-size:.75rem; color:rgba(200,215,255,.55);
+  text-align:center; line-height:1.6;
+}
+.ft-consent-cta {
+  width:100%;
+  background: linear-gradient(135deg,#5db8e8,#2a9fd4);
+  color:#071014; border:none; border-radius:11px;
+  padding:.85rem; font-size:.92rem; font-weight:800;
+  cursor:pointer; font-family:'Raleway',sans-serif;
+  letter-spacing:.04em;
+  box-shadow:0 4px 22px rgba(93,184,232,.3);
+  transition: opacity .15s, transform .12s;
+  position:relative; overflow:hidden;
+}
+.ft-consent-cta::before {
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,.15),transparent);
+  pointer-events:none;
+}
+.ft-consent-cta:hover { opacity:.93; transform:translateY(-1px); }
+.ft-consent-cancel {
+  background:none; border:none; cursor:pointer;
+  font-family:'Raleway',sans-serif;
+  font-size:.72rem; color:rgba(106,140,168,.65);
+  padding:.3rem; transition:color .15s;
+}
+.ft-consent-cancel:hover { color:rgba(200,215,255,.8); }
+.ft-consent-timer {
+  font-family:'DM Mono',monospace;
+  font-size:.65rem; color:rgba(106,140,168,.55);
+  letter-spacing:.08em;
+}
+</style>
 
 <style>
 :root {
