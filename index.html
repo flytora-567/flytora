@@ -9520,6 +9520,8 @@ if (_restartBtnEl) {
   });
 }
 $id('btn-menu').addEventListener('click', () => {
+  // ── MP: if in a multiplayer race, notify others and stop timers ──
+  if (window._mpGameActive) { window._mpQuitMidGame && window._mpQuitMidGame(); }
   show('menu-screen'); refreshMenuStats(); playLobbyBGM();
   setTimeout(() => {
     if (typeof startMenuBirdCanvas === 'function') startMenuBirdCanvas();
@@ -9553,6 +9555,8 @@ $id('pause-quit-btn').addEventListener('click', () => {
   if (window.canvas && window.ctx) {
     window.ctx.clearRect(0, 0, window.canvas.width, window.canvas.height);
   }
+  // ── MP: if in a multiplayer race, notify others and stop timers ──
+  if (window._mpGameActive) { window._mpQuitMidGame && window._mpQuitMidGame(); }
   show('menu-screen'); refreshMenuStats(); playLobbyBGM();
   setTimeout(() => {
     if (typeof startMenuBirdCanvas === 'function') startMenuBirdCanvas();
@@ -21772,24 +21776,33 @@ window.triggerDeath = function(timesUp){
 <script type="module">
 (async function() {
 
-// ── Imports (reuse existing Firebase app via window.FB's underlying db) ──
-// We use the same Firebase project but need access to Firestore directly.
-// Since the main module already initialized, we re-import for this scope.
-const { initializeApp, getApps } = await import("https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js");
-const { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot, deleteField, serverTimestamp }
+// ── Wait for the default Firebase app (initialized by main module above) ──
+// Poll until window._mpDb is ready (set by the main module's Firestore init)
+// We piggyback on the SAME default app & Firestore instance to share auth context
+// and pass security rules — no second app needed.
+
+const { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot, deleteField }
   = await import("https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js");
+const { getApps } = await import("https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js");
 
-const fbConfig = {
-  apiKey:"AIzaSyDfGsUEYLv765U1qYWCVoZbNoWAqb0l6H0",
-  projectId:"flytora-a3d5b",
-  storageBucket:"flytora-a3d5b.firebasestorage.app",
-  messagingSenderId:"45894521850",
-  appId:"1:45894521850:web:7e8d6d9aebc13b987bca43"
-};
+// Wait up to 8s for the default app to be initialized by the main module
+async function _waitForDefaultApp() {
+  for (let i = 0; i < 80; i++) {
+    const apps = getApps();
+    if (apps.length > 0) return apps[0]; // default (un-named) app
+    await new Promise(r => setTimeout(r, 100));
+  }
+  return null;
+}
 
-// Reuse existing app or create a second named one for MP
-const _mpApp = getApps().find(a => a.name==='mp') || initializeApp(fbConfig,'mp');
-const _mpDb  = getFirestore(_mpApp);
+const _defaultApp = await _waitForDefaultApp();
+if (!_defaultApp) {
+  console.error('[MP] Firebase default app never initialized — multiplayer disabled');
+  return;
+}
+
+// Reuse default app's Firestore (same instance, same security rules context)
+const _mpDb = getFirestore(_defaultApp);
 
 // ── State ──
 let _mpUid        = null;  // local player uid (reuse from FB or generate)
@@ -21848,6 +21861,13 @@ function _mpStatus(msg, type='info') {
   el.textContent = msg;
 }
 function _mpClearStatus() { const el=$mp('mp-status-msg'); if(el) el.style.display='none'; }
+
+// ── Firestore rules reminder ──
+console.log('[MP] Multiplayer engine loaded. IMPORTANT: Make sure your Firestore rules allow mp_rooms:\n' +
+  '  match /mp_rooms/{roomId} {\n' +
+  '    allow read, write: if true;\n' +
+  '  }\n' +
+  'Add this in Firebase Console → Firestore → Rules');
 
 // ── OPEN LOBBY ──
 window._openMultiplayerLobby = function() {
@@ -21909,6 +21929,10 @@ window._mpConfirmCreate = async function() {
   const slotIdx = 0;
   const playerColors = PLAYER_COLORS[slotIdx];
 
+  // Grab equipped skin colors from the game
+  const _sk = (window.SKINS && window.SAVE) ? (window.SKINS.find(s=>s.id===window.SAVE.skin)||window.SKINS[0]) : null;
+
+  _mpStatus('Creating room…');
   try {
     await setDoc(roomRef, {
       code,
@@ -21923,18 +21947,26 @@ window._mpConfirmCreate = async function() {
           score: 0,
           alive: true,
           progress: 0,
+          birdY: 0,
           slotIdx,
-          colorBody: playerColors.body,
+          colorBody:  _sk ? _sk.bodyColor  : playerColors.body,
+          colorWing:  _sk ? _sk.wingColor  : playerColors.wing,
+          colorEye:   _sk ? (_sk.eyeColor  || '#111') : '#111',
+          colorBeak:  _sk ? (_sk.beakColor || '#ffc107') : '#ffc107',
           colorLabel: playerColors.label,
           lastSeen: Date.now(),
         }
       }
     });
+    _mpClearStatus();
     _showWaitingRoom(code, true);
     _subscribeRoom(code);
   } catch(e) {
-    _mpStatus('Failed to create room. Check connection.','error');
-    console.error('[MP]',e);
+    console.error('[MP] setDoc error:', e.code, e.message, e);
+    const msg = e.code === 'permission-denied'
+      ? 'Permission denied. Make sure Firestore rules allow writes to mp_rooms.'
+      : 'Failed to create room: ' + (e.message || e.code || 'unknown error');
+    _mpStatus(msg, 'error');
   }
 };
 
@@ -21975,10 +22007,18 @@ window._mpConfirmJoin = async function() {
   const slotIdx = playerCount;
   const playerColors = PLAYER_COLORS[slotIdx % PLAYER_COLORS.length];
 
+  // Grab equipped skin colors from the game
+  const _sk2 = (window.SKINS && window.SAVE) ? (window.SKINS.find(s=>s.id===window.SAVE.skin)||window.SKINS[0]) : null;
+
   const update = {};
   update[`players.${uid}`] = {
-    name: _mpName, score:0, alive:true, progress:0,
-    slotIdx, colorBody: playerColors.body, colorLabel: playerColors.label,
+    name: _mpName, score:0, alive:true, progress:0, birdY:0,
+    slotIdx,
+    colorBody:  _sk2 ? _sk2.bodyColor  : playerColors.body,
+    colorWing:  _sk2 ? _sk2.wingColor  : playerColors.wing,
+    colorEye:   _sk2 ? (_sk2.eyeColor  || '#111') : '#111',
+    colorBeak:  _sk2 ? (_sk2.beakColor || '#ffc107') : '#ffc107',
+    colorLabel: playerColors.label,
     lastSeen: Date.now(),
   };
 
@@ -22017,23 +22057,73 @@ function _showWaitingRoom(code, isHost) {
 }
 
 // ── Subscribe to room updates ──
+let _mpPrevPlayerCount = 0;
 function _subscribeRoom(code) {
   if (_mpUnsubRoom) { _mpUnsubRoom(); _mpUnsubRoom = null; }
   const roomRef = doc(_mpDb, 'mp_rooms', code);
   _mpUnsubRoom = onSnapshot(roomRef, snap => {
-    if (!snap.exists()) { _mpStatus('Room was deleted.','error'); _mpLeaveCleanup(); return; }
+    if (!snap.exists()) {
+      // Room was deleted — end game immediately if active
+      if (_mpGameActive) {
+        _showMpToast('🚫 Room closed. Race ended.');
+        _endMpGame(_mpPlayersSnapshot);
+      } else {
+        _mpStatus('Room was deleted.','error');
+        _mpLeaveCleanup();
+      }
+      return;
+    }
     const data = snap.data();
     _mpRoomData = data;
-    _mpPlayersSnapshot = data.players || {};
+    const players = data.players || {};
+    const playerCount = Object.keys(players).length;
+    _mpPlayersSnapshot = players;
 
     if (data.state === 'waiting') {
-      _renderLobbyPlayers(data.players || {});
+      _mpPrevPlayerCount = playerCount;
+      _renderLobbyPlayers(players);
     } else if (data.state === 'playing' && !_mpGameActive) {
+      _mpPrevPlayerCount = playerCount;
       _startMpGame(data);
+    } else if (data.state === 'playing' && _mpGameActive) {
+      // Update HUD live
+      _updateMpHud(players, _mpTimeLeft);
+
+      // Detect a player leaving mid-game
+      if (playerCount < _mpPrevPlayerCount) {
+        const leftCount = _mpPrevPlayerCount - playerCount;
+        _showMpToast(`⚠️ ${leftCount === 1 ? 'A player' : leftCount + ' players'} left the race!`);
+
+        // If only 1 (or 0) players remain, end the race
+        if (playerCount <= 1) {
+          _showMpToast('🏁 Not enough players — race ending…');
+          // Host writes ended state; everyone else reacts to snapshot
+          if (_mpIsHost && window._mpRoomRef) {
+            updateDoc(window._mpRoomRef, { state: 'ended' }).catch(()=>{});
+          }
+          // End locally after short delay so toast is visible
+          setTimeout(() => { if (_mpGameActive) _endMpGame(players); }, 1800);
+        }
+      }
+      _mpPrevPlayerCount = playerCount;
     } else if (data.state === 'ended' && _mpGameActive) {
-      _endMpGame(data.players || {});
+      _endMpGame(players);
     }
   }, err => { console.warn('[MP] snapshot err:', err); });
+}
+
+// ── Small in-game toast (doesn't use the lobby status bar) ──
+function _showMpToast(msg) {
+  if (typeof showToast === 'function') { showToast(msg); return; }
+  // Fallback: tiny overlay toast
+  const t = document.createElement('div');
+  t.textContent = msg;
+  t.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);z-index:9999;' +
+    'background:rgba(10,10,30,.92);border:1px solid rgba(170,68,255,.4);color:#c4aaff;' +
+    'font-family:Raleway,sans-serif;font-size:.8rem;padding:.55rem 1.1rem;border-radius:10px;' +
+    'pointer-events:none;transition:opacity .4s;';
+  document.body.appendChild(t);
+  setTimeout(() => { t.style.opacity='0'; setTimeout(()=>t.remove(),400); }, 3000);
 }
 
 // ── Render lobby players list ──
@@ -22075,10 +22165,13 @@ function _renderLobbyPlayers(players) {
 window._mpHostStart = async function() {
   if (!_mpRoomId || !_mpIsHost) return;
   const roomRef = doc(_mpDb, 'mp_rooms', _mpRoomId);
+  // Generate a shared seed — all clients will init their RNG with this
+  const sharedSeed = (Math.floor(Math.random() * 2147483646) + 1);
   await updateDoc(roomRef, {
     state: 'playing',
     startTime: Date.now(),
     duration: _mpDuration,
+    rngSeed: sharedSeed,
   });
   // onSnapshot will fire and trigger _startMpGame for all clients
 };
@@ -22090,6 +22183,7 @@ function _startMpGame(data) {
   const startTime = data.startTime || Date.now();
   _mpDuration = data.duration || 60;
   _mpTimeLeft = Math.max(0, _mpDuration - Math.floor((Date.now() - startTime) / 1000));
+  const sharedSeed = data.rngSeed || 12345;
 
   // Hide lobby
   $mp('mp-lobby-screen').classList.add('hidden');
@@ -22099,82 +22193,203 @@ function _startMpGame(data) {
   window._mpMyUid   = _getMpUid();
   window._mpPlayers = data.players || {};
 
-  // Patch into the existing game engine
-  // Set mode so game knows this is multiplayer
   window._mpMode = 'multiplayer_race';
 
   // Show MP HUD
   $mp('mp-race-hud').style.display = 'block';
   _updateMpHud(data.players || {}, _mpTimeLeft);
 
-  // Launch game with sprint-like mode (60/90/120 second timer)
   window.selMode = 'sprint';
   window.selDiff = window.selDiff || 'easy';
 
-  // Override the sprint end time to match room's startTime + duration
-  // We'll patch it after startGame initializes G
-  const _origLaunch = window.launchGame;
-
-  // Directly call startGame path
-  const gs = document.getElementById('game-screen');
-  if (gs) gs.classList.remove('hidden');
-  document.querySelectorAll('.screen').forEach(s => {
-    if (s.id !== 'game-screen') s.classList.add('hidden');
-  });
-
-  // Use the existing countdown + startGame
   if (typeof window.show === 'function') window.show('game-screen');
   if (typeof window.countdown === 'function') {
     window.countdown(() => {
       if (typeof window.startGame === 'function') {
+        // Apply shared RNG seed BEFORE startGame so obstacle positions are identical
+        if (typeof window._rngSeed !== 'undefined') window._rngSeed = sharedSeed;
+
         window.startGame();
-        // Override sprint time to sync with server
+
         if (window.G) {
           window.G.sprintEnd = startTime + _mpDuration * 1000;
-          window.G.mode = 'sprint'; // still use sprint physics
-          window.G._isMpRace = true; // flag for our hooks
-          // Track score changes
-          _setupMpScoreHook();
+          window.G.mode = 'sprint';
+          window.G._isMpRace = true;
+
+          // Also force the RNG seed again (startGame resets it internally)
+          if (typeof window._rngSeed !== 'undefined') window._rngSeed = sharedSeed;
         }
+
+        // Hook the render function to draw ghost birds on top
+        _hookMpRender();
       }
     });
   }
 
-  // Start countdown timer
   _startMpTimer(startTime);
 
-  // Live sync every 500ms
-  _mpSyncTimer = setInterval(_syncMpScore, 500);
+  // Sync score + birdY every 200ms for smooth ghost positions
+  _mpSyncTimer = setInterval(_syncMpScore, 200);
 }
 
-// ── Score sync hook: patch completeWord ──
-function _setupMpScoreHook() {
-  // We listen to G.score changes each sync tick — no need to patch
-  // Just capture scores in _syncMpScore
-}
-
-// ── Sync local score to Firestore ──
+// ── Sync local score + birdY to Firestore ──
 async function _syncMpScore() {
   if (!_mpGameActive || !window._mpRoomRef || !window._mpMyUid) return;
-  const score = (window.G && window.G.score) ? Math.floor(window.G.score) : 0;
-  const words  = (window.G && window.G.words)  ? window.G.words : 0;
-  const alive  = (window.G && window.G.bird)   ? window.G.bird.alive : true;
-  const progress = window._mpMaxScore ? Math.min(1, score / window._mpMaxScore) : score / 5000;
+  const G = window.G;
+  const score  = G ? Math.floor(G.score) : 0;
+  const words  = G ? G.words : 0;
+  const alive  = G && G.bird ? G.bird.alive : true;
+  const birdY  = G && G.bird ? Math.round(G.bird.y) : 0;
+  const progress = score / 5000;
 
   _mpMyScore = score;
 
   try {
     const upd = {};
     upd[`players.${window._mpMyUid}.score`]    = score;
-    upd[`players.${window._mpMyUid}.words`]     = words;
-    upd[`players.${window._mpMyUid}.alive`]     = alive;
-    upd[`players.${window._mpMyUid}.progress`]  = progress;
-    upd[`players.${window._mpMyUid}.lastSeen`]  = Date.now();
+    upd[`players.${window._mpMyUid}.words`]    = words;
+    upd[`players.${window._mpMyUid}.alive`]    = alive;
+    upd[`players.${window._mpMyUid}.birdY`]    = birdY;
+    upd[`players.${window._mpMyUid}.progress`] = progress;
+    upd[`players.${window._mpMyUid}.lastSeen`] = Date.now();
     await updateDoc(window._mpRoomRef, upd);
   } catch(e) {}
 }
 
-// ── Timer ──
+// ── Hook render to draw ghost birds for all other players ──
+let _mpRenderHooked = false;
+function _hookMpRender() {
+  if (_mpRenderHooked) return;
+  _mpRenderHooked = true;
+
+  const _origRender = window.render;
+  window.render = function(dt) {
+    _origRender(dt); // draw everything normally first
+    if (_mpGameActive && window.G && window.canvas) {
+      _drawGhostBirds(window.ctx, window.G.t || 0);
+    }
+  };
+}
+
+// ── Ghost bird wing animation state ──
+const _ghostWing = {};
+
+// ── Draw all other players' birds as semi-transparent ghosts ──
+function _drawGhostBirds(ctx, t) {
+  if (!ctx) return;
+  const myUid   = _getMpUid();
+  const players = _mpPlayersSnapshot;
+  if (!players) return;
+
+  const G = window.G;
+  const canvasH = window.canvas.height;
+  // My bird X position (ghosts fly at same X — same obstacles)
+  const birdX   = G && G.bird ? G.bird.x : window.canvas.width * 0.22;
+
+  Object.entries(players).forEach(([uid, p]) => {
+    if (uid === myUid) return; // skip self
+    if (!p.birdY && p.birdY !== 0) return; // no position yet
+
+    // Interpolate Y smoothly (lerp toward reported position)
+    if (!_ghostWing[uid]) _ghostWing[uid] = { wing: 0, displayY: p.birdY || canvasH / 2 };
+    const ghost = _ghostWing[uid];
+
+    // Smooth lerp toward actual position (reduces jitter from 200ms updates)
+    ghost.displayY += (p.birdY - ghost.displayY) * 0.18;
+    ghost.wing += 0.08; // continuous wing flap
+
+    const x = birdX;
+    const y = ghost.displayY;
+    const bodyColor = p.colorBody || '#5db8e8';
+    const wingColor = p.colorWing || '#3a8fb5';
+    const eyeColor  = p.colorEye  || '#111';
+    const beakColor = p.colorBeak || '#ffc107';
+    const nameLabel = p.name || 'Player';
+    const isAlive   = p.alive !== false;
+
+    ctx.save();
+    ctx.globalAlpha = isAlive ? 0.72 : 0.25;
+
+    // ── Name label above ghost bird ──
+    ctx.font = 'bold 11px "DM Mono",monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+
+    // Label background pill
+    const labelW = ctx.measureText(nameLabel).width + 12;
+    const labelH = 16;
+    const labelX = x - labelW / 2;
+    const labelY = y - 22 - labelH;
+    ctx.fillStyle = 'rgba(3,3,18,0.75)';
+    ctx.beginPath();
+    ctx.roundRect ? ctx.roundRect(labelX, labelY, labelW, labelH, 5)
+                  : ctx.rect(labelX, labelY, labelW, labelH);
+    ctx.fill();
+
+    // Label text — colored with player color
+    ctx.fillStyle = p.colorLabel || bodyColor;
+    ctx.fillText(nameLabel, x, y - 22);
+
+    // Score badge
+    const scoreStr = (p.score || 0).toLocaleString();
+    ctx.font = '9px "DM Mono",monospace';
+    ctx.fillStyle = 'rgba(200,215,255,0.55)';
+    ctx.fillText(scoreStr, x, y - 9);
+
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+
+    // ── Ghost bird body ──
+    ctx.save();
+    ctx.translate(x, y);
+
+    // Subtle glow
+    ctx.shadowColor = bodyColor;
+    ctx.shadowBlur  = 10;
+
+    // Body ellipse
+    ctx.fillStyle = bodyColor;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 21, 14, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Wing
+    const wa = Math.sin(ghost.wing) * 0.55;
+    ctx.fillStyle = wingColor;
+    ctx.beginPath();
+    ctx.ellipse(-4, -2, 12, 5, wa, 0, Math.PI);
+    ctx.fill();
+
+    ctx.shadowBlur = 0;
+
+    // Eye
+    ctx.fillStyle = eyeColor;
+    ctx.beginPath();
+    ctx.arc(13, -3, 4.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.arc(14, -4, 1.8, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Beak
+    ctx.fillStyle = beakColor;
+    ctx.beginPath();
+    ctx.moveTo(20, 0); ctx.lineTo(32, -2); ctx.lineTo(32, 5);
+    ctx.closePath();
+    ctx.fill();
+
+    // Tail
+    ctx.fillStyle = wingColor;
+    ctx.beginPath();
+    ctx.moveTo(-21, 0); ctx.lineTo(-34, -8); ctx.lineTo(-32, 1); ctx.lineTo(-34, 9);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.restore();
+    ctx.restore();
+  });
+}
 function _startMpTimer(startTime) {
   if (_mpGameTimer) clearInterval(_mpGameTimer);
   _mpGameTimer = setInterval(() => {
@@ -22348,17 +22563,57 @@ window._mpBackToMenu = function() {
   if (typeof window.playLobbyBGM === 'function') window.playLobbyBGM();
 };
 
-// ── Leave room ──
+// ── Mid-game quit — stops timers, removes from Firestore, notifies others ──
+async function _mpQuitMidGame() {
+  if (!_mpRoomId) return;
+  const uid = _getMpUid();
+  const roomRef = doc(_mpDb, 'mp_rooms', _mpRoomId);
+
+  // Stop all MP timers FIRST so the countdown stops immediately locally
+  if (_mpGameTimer) { clearInterval(_mpGameTimer); _mpGameTimer = null; }
+  if (_mpSyncTimer) { clearInterval(_mpSyncTimer);  _mpSyncTimer = null; }
+  $mp('mp-race-hud').style.display = 'none';
+
+  try {
+    const snap = await getDoc(roomRef);
+    if (snap.exists()) {
+      const data = snap.data();
+      const players = data.players || {};
+      const remaining = Object.keys(players).filter(k => k !== uid);
+
+      const upd = {};
+      upd[`players.${uid}`] = deleteField();
+
+      // If I was host and others remain, transfer host to next player
+      if (_mpIsHost && remaining.length > 0) {
+        upd.hostUid = remaining[0];
+      }
+
+      // If 1 or fewer players will remain, end the room
+      if (remaining.length <= 1) {
+        upd.state = 'ended';
+      }
+
+      await updateDoc(roomRef, upd);
+    }
+  } catch(e) { console.warn('[MP] quit update failed:', e); }
+
+  _mpLeaveCleanup();
+}
+
+// ── Leave room (lobby only) ──
 window._mpLeaveRoom = function() {
-  if (_mpRoomId) {
+  if (_mpGameActive) {
+    // Mid-game quit
+    _mpQuitMidGame();
+  } else if (_mpRoomId) {
     const uid = _getMpUid();
     const roomRef = doc(_mpDb, 'mp_rooms', _mpRoomId);
-    // Remove player from room
     const upd = {};
     upd[`players.${uid}`] = deleteField();
     updateDoc(roomRef, upd).catch(()=>{});
+    _mpLeaveCleanup();
   }
-  _mpLeaveCleanup();
   _resetLobbyUI();
   $mp('mp-lobby-screen').classList.add('hidden');
 };
@@ -22371,13 +22626,38 @@ function _mpLeaveCleanup() {
   _mpIsHost     = false;
   _mpGameActive = false;
   _mpRoomData   = null;
+  _mpPrevPlayerCount = 0;
   _mpPlayersSnapshot = {};
-  window._mpRoomRef = null;
-  window._mpMode    = null;
+  _mpRenderHooked    = false; // allow re-hook on next game
+  // Clear ghost wing state
+  Object.keys(_ghostWing).forEach(k => delete _ghostWing[k]);
+  window._mpRoomRef  = null;
+  window._mpMode     = null;
+  window._mpGameActive = false;
   $mp('mp-race-hud').style.display = 'none';
 }
 
-// ── Inject pulse animation CSS ──
+// Expose on window so btn hooks (defined before this module) can call them
+window._mpQuitMidGame = _mpQuitMidGame;
+Object.defineProperty(window, '_mpGameActive', {
+  get: () => _mpGameActive,
+  set: v => { _mpGameActive = v; },
+  configurable: true,
+});
+
+// Clean up on browser close / tab refresh
+window.addEventListener('beforeunload', () => {
+  if (_mpRoomId) {
+    const uid = _getMpUid();
+    const roomRef = doc(_mpDb, 'mp_rooms', _mpRoomId);
+    const upd = {};
+    upd[`players.${uid}`] = deleteField();
+    // Use sendBeacon-style fire-and-forget (no await possible in beforeunload)
+    try { updateDoc(roomRef, upd); } catch(e) {}
+  }
+});
+
+// ── Inject CSS ──
 const mpStyle = document.createElement('style');
 mpStyle.textContent = `
 @keyframes mpPulse {
@@ -22391,7 +22671,7 @@ mpStyle.textContent = `
 `;
 document.head.appendChild(mpStyle);
 
-console.log('[MP] Multiplayer engine loaded ✓');
+console.log('[MP] Multiplayer engine loaded ✓ — using default Firebase app');
 
 })();
 </script>
