@@ -17,7 +17,6 @@
 <!-- Google AdSense -->
 <meta name="google-adsense-account" content="ca-pub-2074405628532423">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2074405628532423" crossorigin="anonymous"></script>
-<meta name="6a97888e-site-verification" content="550fb9ae7f1d4013d748ea3206aee8b3">
 
 <!-- ═══ VIEWPORT & MOBILE ═══ -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
@@ -912,7 +911,7 @@
 }
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;user-select:none;cursor:default;}
-.screen{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;z-index:1;}
+.screen{position:absolute;inset:0;display:flex;align-items:flex-start;justify-content:center;flex-direction:column;z-index:1;overflow-y:auto;padding:1rem 0;}
 .screen.hidden{display:none!important;}
 ::-webkit-scrollbar{width:4px;}
 ::-webkit-scrollbar-track{background:var(--panel);}
@@ -2103,7 +2102,7 @@ body.mathmode #diff-btn-insane{display:none!important;}
 .pu-timer-fill{height:100%;border-radius:2px;transition:width .1s linear;}
 /* ===== POWERUP STASH INVENTORY ===== */
 #stash-bar{
-  position:absolute;bottom:6.8rem;left:50%;transform:translateX(-50%);
+  position:absolute;bottom:calc(1.1rem + 3.6rem);left:50%;transform:translateX(-50%);
   z-index:10;display:flex;gap:.55rem;align-items:flex-end;pointer-events:none;
 }
 .stash-slot{
@@ -2184,7 +2183,32 @@ body.mathmode #diff-btn-insane{display:none!important;}
 @keyframes inputFreezeFlicker{0%,100%{box-shadow:0 0 22px rgba(144,202,249,.5),0 0 8px rgba(144,202,249,.2) inset;}50%{box-shadow:0 0 36px rgba(144,202,249,.8),0 0 14px rgba(200,230,255,.3) inset;}}
 @keyframes inputDoublePulse{0%,100%{box-shadow:0 0 18px rgba(232,200,122,.4),0 0 6px rgba(232,200,122,.15) inset;}50%{box-shadow:0 0 32px rgba(232,200,122,.7),0 0 12px rgba(255,220,100,.25) inset;}}
 
-/* ── WORD COMPLETE SATISFACTION EFFECT ── */
+/* ── WORD PREVIEW — dim remaining letters behind the real input ── */
+#type-input-wrap { position: relative; width: 100%; border-radius: 8px; overflow: hidden; }
+/* The real input sits on top, fully transparent background so word-bg shows through */
+#type-input { position: relative; z-index: 2; background: transparent !important; }
+/* word-bg: exact clone of input's box, renders the full word split */
+#word-bg {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  border: 2px solid transparent;
+  padding: .65rem 1.1rem;
+  font-family: 'DM Mono', monospace;
+  font-size: 1.25rem;
+  letter-spacing: .06em;
+  color: transparent;           /* typed portion: invisible — real input text shows */
+  white-space: pre;
+  overflow: hidden;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  z-index: 1;
+  background: rgba(5,5,18,.95);
+  border-radius: 8px;
+}
+/* The dim remaining-letters portion */
+#word-bg .wb-remain { color: rgba(255,255,255,.25); }
+
 @keyframes wordCompleteRipple{0%{box-shadow:0 0 0 0 rgba(93,184,232,.7),0 0 18px rgba(93,184,232,.2);}60%{box-shadow:0 0 0 14px rgba(93,184,232,0),0 0 28px rgba(93,184,232,.3);}100%{box-shadow:0 0 0 0 rgba(93,184,232,0),0 0 0 rgba(93,184,232,0);}}
 @keyframes wordCompleteFlash{0%{background:rgba(93,184,232,.18);border-color:var(--accent);}50%{background:rgba(93,184,232,.28);border-color:#a0e0ff;}100%{background:rgba(5,5,18,.95);}}
 #type-input.word-complete{animation:wordCompleteRipple .38s cubic-bezier(.2,.8,.3,1) forwards,wordCompleteFlash .38s ease forwards!important;}
@@ -2225,7 +2249,7 @@ body.mathmode #diff-btn-insane{display:none!important;}
 
 /* GAME OVER */
 #gameover-screen{background:rgba(3,3,10,.95);backdrop-filter:blur(16px);z-index:25;}
-.go-box{text-align:center;display:flex;flex-direction:column;align-items:center;gap:.9rem;padding:2.4rem 2.8rem 2rem;border:1px solid rgba(93,184,232,.14);border-radius:20px;background:linear-gradient(160deg,rgba(8,10,26,.98) 0%,rgba(5,6,18,.99) 100%);min-width:min(480px,90vw);max-width:520px;box-shadow:0 0 100px rgba(0,0,0,.9),0 0 0 1px rgba(93,184,232,.07);position:relative;overflow:hidden;}
+.go-box{text-align:center;display:flex;flex-direction:column;align-items:center;gap:.9rem;padding:2.4rem 2.8rem 2rem;border:1px solid rgba(93,184,232,.14);border-radius:20px;background:linear-gradient(160deg,rgba(8,10,26,.98) 0%,rgba(5,6,18,.99) 100%);min-width:min(480px,90vw);max-width:560px;box-shadow:0 0 100px rgba(0,0,0,.9),0 0 0 1px rgba(93,184,232,.07);position:relative;overflow:visible;}
 .go-box::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent 0%,#5db8e8 30%,#9b7fd4 70%,transparent 100%);opacity:.85;}
 .go-box::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--danger),var(--accent2),transparent);}
 .go-title{font-family:'Cinzel',serif;font-size:3.3rem;font-weight:900;color:var(--accent3);letter-spacing:.1em;text-shadow:0 0 30px var(--glow-g);}
@@ -4205,7 +4229,7 @@ body {
 
   /* ── STASH BAR ── */
   #stash-bar {
-    bottom: 9.5rem !important;
+    bottom: calc(.6rem + 3.2rem) !important;
     gap: .35rem !important;
   }
   .stash-card { width: 38px !important; height: 42px !important; }
@@ -4230,6 +4254,13 @@ body {
     border-width: 2.5px !important;
     /* Prevents iOS zoom on focus */
     font-size: max(16px, 1.05rem) !important;
+  }
+  #word-bg {
+    font-size: max(16px, 1.05rem) !important;
+    padding: .75rem 1rem !important;
+  }
+  #type-input-wrap {
+    border-radius: 10px !important;
   }
 
   /* ── MOBILE KEYBOARD TRIGGER BUTTON ── */
@@ -4537,9 +4568,9 @@ body {
     bottom: 8rem !important;
   }
 
-  /* Stash bar: move up more */
+  /* Stash bar: sit just above the input box */
   #stash-bar {
-    bottom: 8.2rem !important;
+    bottom: calc(.6rem + 3.4rem) !important;
   }
 
   /* When game is active make sure all HUD fits the compressed canvas */
@@ -4661,11 +4692,44 @@ body.playing .skin-item.owned-celestial { animation: none !important; }
 }
 
 
+/* ── Hide bottom banner during active gameplay — game goes fullscreen ── */
+body.playing #adsense-bottom-banner {
+  display: none !important;
+}
+body.playing .screen,
+body.playing #game-screen {
+  bottom: 0 !important;
+}
+body.playing .menu-layout {
+  height: 100vh !important;
+}
+body.playing #typing-area {
+  bottom: .5rem !important;
+}
+body.playing #mobile-kb-trigger {
+  bottom: 6.3rem !important;
+}
+body.playing #cookie-consent-banner {
+  bottom: 0 !important;
+}
+body.playing .toast {
+  bottom: 1.5rem !important;
+}
+body.playing #daily-banner.show {
+  bottom: 6.5rem !important;
+}
+body.playing #stash-bar {
+  bottom: calc(.5rem + 3.5rem) !important;
+}
+body.playing #bot-hud {
+  bottom: 8rem !important;
+}
+
 /* ── MOBILE: ensure game canvas doesn't overlap fixed top/bottom ads ── */
 @media (max-width: 768px) {
   body.playing #game-screen {
     top: var(--ad-top-height, 50px) !important;
-    bottom: var(--ad-bottom-height, 50px) !important;
+    bottom: 0 !important;
   }
   /* Keep typing area above the bottom ad bar */
   #typing-area {
@@ -4698,9 +4762,9 @@ body.playing .skin-item.owned-celestial { animation: none !important; }
   #daily-banner.show {
     bottom: calc(var(--ad-bottom-height, 50px) + 6.5rem) !important;
   }
-  /* Stash bar above ad */
+  /* Stash bar above input box */
   #stash-bar {
-    bottom: calc(var(--ad-bottom-height, 50px) + 8.2rem) !important;
+    bottom: calc(var(--ad-bottom-height, 0px) + .6rem + 3.2rem) !important;
   }
   /* Bot hud above ad */
   #bot-hud {
@@ -4826,6 +4890,14 @@ body {
   :root { color-scheme: dark; }
 }
 
+</style>
+<style id="go-ad-style">
+/* ── Result screen side ads (160x600) ── */
+#go-layout{display:flex;align-items:flex-start;justify-content:center;gap:24px;width:100%;max-width:100vw;padding:0 12px;box-sizing:border-box;}
+.go-side-ad{width:160px;min-width:160px;display:none;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:2.4rem;}
+.go-side-ad ins{display:block;width:160px;height:600px;}
+@media(min-width:980px){.go-side-ad{display:flex;}}
+@media(max-width:979px){#go-layout{flex-direction:column;align-items:center;gap:0;}.go-side-ad{display:none!important;}}
 </style>
 <body>
 
@@ -5428,7 +5500,10 @@ body {
   <div id="typing-area">
     <div id="type-hint" id="type-hint-typing">TYPE WORD TO FLY &nbsp;·&nbsp; PRESS <b style="color:var(--accent);font-family:Orbitron,monospace">1 2 3 4</b> TO DEPLOY POWERS</div>
   <div id="math-mode-hud" style="display:none;align-items:center;gap:.5rem;justify-content:center;font-family:'DM Mono',monospace;font-size:.65rem;color:#e8c87a;letter-spacing:.1em;padding:.2rem .6rem;background:rgba(232,200,122,.08);border:1px solid rgba(232,200,122,.25);border-radius:8px;margin-bottom:.3rem;">🧮 MATH MODE &nbsp;·&nbsp; Type the answer &amp; press Enter</div>
-    <input id="type-input" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="waiting…" enterkeyhint="done">
+    <div id="type-input-wrap">
+      <input id="type-input" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="waiting…" enterkeyhint="done">
+      <div id="word-bg" aria-hidden="true"></div>
+    </div>
   </div>
   <div id="pause-overlay" class="hidden">
     <div class="pause-title">PAUSED</div>
@@ -5445,33 +5520,51 @@ body {
 
 <!-- ===== GAME OVER ===== -->
 <div id="gameover-screen" class="screen hidden">
-  <div class="go-box">
+  <div id="go-layout">
+    <!-- Left 160x600 ad -->
+    <div id="go-ad-left" class="go-side-ad">
+      <div id="go-ad-left-slot"></div>
+    </div>
+    <div class="go-box">
+    <!-- Result screen ad — 320×50 — shown only when result is visible -->
+    <div id="result-ad-container" style="
+      width:320px;max-width:100%;height:50px;
+      margin:0 auto .6rem auto;
+      display:flex;align-items:center;justify-content:center;
+      overflow:hidden;border-radius:6px;
+      background:rgba(0,0,0,.4);
+    ">
+      <div id="hpf-result-slot" style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;"></div>
+    </div>
     <div class="go-title" id="go-title">CRASHED!</div>
     <div class="grade-display" id="go-grade">—</div>
     <div class="go-coins-earned" id="go-coins-earned">🪙 +0 COINS</div>
     <div style="display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;min-height:1.6rem;">
-      <div id="new-best-badge" class="new-best hidden">🏆 NEW BEST!</div>
       <div id="ach-badge" class="new-best hidden" style="color:var(--purple);border-color:rgba(155,127,212,.4);background:rgba(155,127,212,.1);"></div>
     </div>
-    <div class="go-stats">
-      <div class="go-stat"><div class="go-stat-label">Score</div><div class="go-stat-val c-cyan" id="go-score">0</div></div>
-      <div class="go-stat"><div class="go-stat-label">Best</div><div class="go-stat-val c-gold" id="go-best">0</div></div>
-      <div class="go-stat"><div class="go-stat-label">Words</div><div class="go-stat-val c-green" id="go-words">0</div></div>
-      <div class="go-stat"><div class="go-stat-label">Peak WPM</div><div class="go-stat-val c-purple" id="go-wpm">0</div></div>
-    </div>
-    <div class="go-stats">
-      <div class="go-stat"><div class="go-stat-label">Max Combo</div><div class="go-stat-val c-gold" id="go-combo">0</div></div>
-      <div class="go-stat"><div class="go-stat-label">Accuracy</div><div class="go-stat-val c-cyan" id="go-accuracy">0%</div></div>
-      <div class="go-stat"><div class="go-stat-label">Time</div><div class="go-stat-val c-green" id="go-time">0s</div></div>
-    </div>
+    <!-- ── RICH RESULTS PANEL ── -->
+    <div id="go-rich-panel" style="width:100%;"></div>
+    <!-- Legacy hidden elements kept for JS compatibility -->
+    <span id="go-score" style="display:none">0</span>
+    <span id="go-best" style="display:none">0</span>
+    <span id="go-words" style="display:none">0</span>
+    <span id="go-wpm" style="display:none">0</span>
+    <span id="go-combo" style="display:none">0</span>
+    <span id="go-accuracy" style="display:none">0%</span>
+    <span id="go-time" style="display:none">0s</span>
         <div class="go-btns">
       <button class="go-btn revive" id="btn-revive">🪙 REVIVE (50)</button>
       <button class="go-btn" id="btn-replay" onclick="instantRestart()" style="background:linear-gradient(135deg,rgba(93,184,232,.22),rgba(93,184,232,.08));border:1.5px solid rgba(93,184,232,.5);color:var(--accent);">▶ PLAY AGAIN <kbd style="font-family:'DM Mono',monospace;font-size:.52rem;background:rgba(93,184,232,.15);border:1px solid rgba(93,184,232,.25);border-radius:4px;padding:.08rem .32rem;color:var(--accent);margin-left:.3rem;">R</kbd></button>
       <button class="go-btn share" id="btn-share">SHARE</button>
       <button class="go-btn secondary" id="btn-menu">MENU</button>
     </div>
-  </div>
-</div>
+    </div><!-- /.go-box -->
+    <!-- Right 160x600 ad -->
+    <div id="go-ad-right" class="go-side-ad">
+      <div id="go-ad-right-slot"></div>
+    </div>
+  </div><!-- /#go-layout -->
+</div><!-- /#gameover-screen -->
 
 <div id="ad-interstitial" class="hidden">
   <div class="ad-int-box">
@@ -6675,12 +6768,192 @@ const usedWords = { easy:new Set(), medium:new Set(), hard:new Set(), insane:new
 let WORDS_FALLBACK = { easy:[], medium:[], hard:[], insane:[] };
 const WORDS = { easy:[], medium:[], hard:[], insane:[] };
 
+// ── INLINE FALLBACK WORDS (always available, no server needed) ──
+(function _seedFallbackWords() {
+  const _FB = {
+    easy: [
+      'cat','dog','sun','run','fly','sit','hop','big','red','cup',
+      'box','hat','bag','map','arm','leg','eye','ear','lip','tip',
+      'dip','rip','zip','nip','hip','fit','bit','hit','kit','wit',
+      'bat','fat','mat','pat','rat','sat','tab','cab','dab','jab',
+      'lab','nab','ban','can','fan','man','pan','ran','tan','van',
+      'bed','fed','led','red','wed','hen','pen','ten','den','men',
+      'bet','get','jet','let','met','net','pet','set','vet','wet',
+      'bid','did','hid','kid','lid','rid','bin','din','fin','gin',
+      'him','hot','cot','dot','got','lot','not','pot','rot','tot',
+      'bun','fun','gun','nun','pun','run','sun','ton','won','son'
+    ],
+    medium: [
+      'about','above','after','again','along','among','apple','beach',
+      'black','blank','blend','block','bloom','blown','board','boost',
+      'brain','brave','break','brick','brief','bring','broad','brown',
+      'brush','build','built','bunny','burst','buyer','cabin','carry',
+      'catch','cause','chain','chair','charm','chase','check','chess',
+      'chest','child','choir','chunk','civic','claim','clash','class',
+      'clean','clear','clerk','click','cliff','climb','cling','clock',
+      'close','cloth','cloud','coach','coast','crane','crash','crazy',
+      'cream','creek','crisp','crook','cross','crowd','crush','curve',
+      'cyber','cycle','daily','dance','dark','death','delay','delta',
+      'depth','derby','digit','dirty','diver','dizzy','doubt','dough',
+      'draft','drain','drama','drank','drawn','dream','dress','drift',
+      'drink','drive','drone','drove','drown','drunk','dryer','dunes',
+      'dusty','eager','early','earth','eight','elite','ember','empty',
+      'enjoy','enter','equal','error','essay','event','every','exact',
+      'extra','fable','faint','faith','false','fancy','fatal','feast',
+      'fence','fetch','field','fifth','fifty','fight','final','finds',
+      'flame','flash','fleet','flesh','float','floor','fluid','flush',
+      'focus','foggy','force','forge','forth','found','frame','frank',
+      'freed','fresh','front','frost','froze','fruit','fully','fungi',
+      'funny','ghost','giant','given','glare','glass','gleam','gloom',
+      'glory','gloss','glove','going','grace','grade','grain','grand',
+      'grant','graph','grasp','grass','graze','great','green','greet',
+      'grind','groan','group','grove','grown','guard','guess','guide',
+      'guild','guilt','guise','gusts','habit','happy','harsh','haste',
+      'haven','heart','heavy','hedge','hinge','hobby','honor','horse',
+      'hotel','house','human','humor','ideal','image','imply','inbox',
+      'index','indie','infer','inner','input','intro','ivory','jewel',
+      'joint','joker','judge','juice','jumbo','jumpy','karma','knife',
+      'knock','known','label','lance','laser','later','laugh','layer',
+      'learn','lease','leave','legal','lemon','level','light','limit',
+      'liner','lingo','liver','local','lodge','logic','loose','lover',
+      'lower','lucky','lunar','magic','major','maker','manor','march',
+      'match','medal','mercy','metal','might','minor','minus','model',
+      'money','month','moral','motor','mount','mouse','mouth','movie',
+      'muddy','music','naïve','nerve','never','night','noble','noise',
+      'north','notes','novel','nurse','oasis','ocean','offer','often',
+      'older','omega','onset','opens','order','other','outer','owner',
+      'ozone','paint','panel','paper','party','pause','peace','peach',
+      'pearl','pedal','phase','phone','photo','piano','pitch','pixel',
+      'place','plain','plane','plant','plate','plaza','plead','plumb',
+      'plume','plunge','pocket','point','polar','posed','power','press',
+      'price','pride','prime','print','prior','prize','probe','prone',
+      'proof','prose','proud','prove','proxy','pulse','punch','pupil',
+      'queen','query','quest','queue','quick','quiet','quota','quote',
+      'radar','radio','raise','range','rapid','ratio','reach','ready',
+      'realm','rebel','refer','relay','remix','renal','repay','reply',
+      'rider','rifle','right','rigid','risky','rival','river','robot',
+      'rocky','rouge','rough','round','royal','rugby','ruler','rural',
+      'safer','saint','salad','scale','scene','scope','score','scout',
+      'seize','sense','serve','seven','sewer','shaft','shake','shall',
+      'shame','shape','share','sharp','shift','shine','shirt','shock',
+      'shoot','short','shout','sight','sigma','silly','since','sixth',
+      'sixty','skill','skull','skunk','slate','slave','sleep','slide',
+      'slope','sloth','smart','smile','smoke','snail','snake','solar',
+      'solid','solve','sorry','south','space','spark','spawn','speak',
+      'speed','spend','spill','spine','spite','split','spoke','sport',
+      'spray','squad','staff','stage','stain','stake','stale','stall',
+      'stamp','stand','stark','start','state','stays','steam','steel',
+      'steep','steer','stern','stick','stiff','still','stock','stomp',
+      'stone','stood','store','storm','story','strap','stray','strip',
+      'stuck','study','stuff','stunt','style','sugar','suite','sunny',
+      'super','surge','swamp','swear','sweep','sweet','swift','sword',
+      'table','taken','taste','teach','teeth','tempo','tense','tenth',
+      'theme','thick','thing','think','third','thorn','three','threw',
+      'throw','tiger','tight','timer','tired','title','today','token',
+      'topic','total','touch','tough','tower','toxic','track','trade',
+      'trail','train','trait','trash','trick','tried','troop','trove',
+      'truck','truly','trust','truth','tumor','tuner','twist','typed',
+      'ultra','uncle','under','union','until','upper','urban','usage',
+      'usual','utter','valid','value','valve','vapor','video','vigor',
+      'viral','virus','vital','vivid','vocal','voter','watch','water',
+      'waves','weary','weird','wheat','wheel','where','which','while',
+      'white','whole','whose','wider','windy','witch','woman','women',
+      'world','worry','worse','worst','worth','would','wound','wrath',
+      'write','wrong','yield','young','youth','zebra','zonal'
+    ],
+    hard: [
+      'abandon','ability','absence','academy','account','achieve','acquire',
+      'address','advance','adverse','affects','affirm','against','agency',
+      'agenda','ancient','anymore','archive','arrange','assault','assert',
+      'attract','balance','barrier','battery','between','billion','blossom',
+      'boolean','borough','breadth','brittle','browser','cabinet','captive',
+      'capture','careful','cascade','cavalry','certain','chapter','charity',
+      'chronic','circuit','climate','cluster','coating','cognize','collect',
+      'collide','comfort','command','compete','compile','complex','concept',
+      'conduct','confirm','conform','connect','consent','content','context',
+      'control','convert','correct','counter','courage','creative','crucial',
+      'crystal','culture','curator','curious','current','curtain','custody',
+      'customs','cutting','cycling','cynical','because','declare','defeat',
+      'defense','defined','defunct','deliver','density','deposit','deserve',
+      'despite','destroy','diagram','dialect','digital','dilemma','disable',
+      'discuss','disease','display','dispute','distant','dynamic','eastern',
+      'economy','elegant','element','embargo','emotion','enhance','episode',
+      'essence','ethical','evident','examine','example','exhibit','explore',
+      'express','extreme','factory','failure','fantasy','feature','fiction',
+      'finance','fixture','flavour','foreign','formula','forward','freedom',
+      'freight','frontier','further','gallery','genuine','gesture','gravity',
+      'habitat','harmony','harvest','history','horizon','hostile','however',
+      'ignite','imagine','immense','imposed','improve','include','indices',
+      'initial','instead','integer','intense','journey','kingdom','knowing',
+      'lacking','largely','lateral','learned','lecture','library','limited',
+      'literal','loyalty','machine','maintain','manager','mandate','massive',
+      'measure','medical','medium','message','migrate','mission','mixture',
+      'monitor','monthly','natural','network','nothing','nuclear','obvious',
+      'officer','opinion','outcome','outside','overall','overlap','package',
+      'pattern','penalty','percent','perform','perhaps','physics','pillar',
+      'pioneer','popular','possess','present','prevent','primary','problem',
+      'process','program','project','protect','provide','publish','pursuit',
+      'quality','quantum','quarter','quickly','reality','receive','recover',
+      'reflect','refugee','regards','release','replace','require','resolve',
+      'respect','restore','results','revenue','reverse','science','section',
+      'segment','service','setting','several','silence','similar','skilled',
+      'society','someone','station','storage','strikes','student','subject',
+      'support','survive','suspect','sustain','tactics','tension','through',
+      'tonight','tourism','trading','tragedy','transit','trouble','trusted',
+      'turning','typical','uniform','upgrade','venture','version','visible',
+      'voltage','wealthy','welfare','without','working','worship','writing'
+    ],
+    insane: [
+      'abbreviation','abnormalities','abolishment','abomination','abruptness',
+      'abstraction','accomplished','accumulation','acetylcholine','acquisition',
+      'administration','adventurous','advertisement','affectionately','aggravation',
+      'agriculture','alphabetical','ambitious','amplification','antibiotic',
+      'announcement','annihilation','approximately','assassination','atmospheric',
+      'authentication','automatically','availability','awesomeness','bewilderment',
+      'bibliography','blackberries','breakthrough','brotherhood','bureaucratic',
+      'calculations','capitalization','catastrophic','circumstantial','civilization',
+      'classification','collaboration','commemoration','communication','compassionate',
+      'comprehension','configuration','confrontation','consciousness','consequential',
+      'consideration','constitutional','contradiction','controversial','corporation',
+      'crystallization','daydreaming','decentralized','decomposition','demonstration',
+      'dependencies','deterioration','determination','developmental','disappearance',
+      'disappointment','disconnection','discontinuous','disqualification','distribution',
+      'documentation','electromagnetic','embarrassment','empowerment','encouragement',
+      'encyclopedia','enlightenment','environmental','establishment','exaggeration',
+      'examination','experimentation','extraordinary','falsification','forgiveness',
+      'fragmentation','functionality','globalization','graphically','gravitational',
+      'hallucination','headquarters','hierarchical','homogenization','hypothetical',
+      'identification','impersonation','implementation','improvement','incompatible',
+      'infrastructure','initialization','interconnected','investigation','justification',
+      'knowledgeable','liberalization','manufacturing','mathematician','maximization',
+      'metamorphosis','metropolitan','microprocessor','modification','multiplication',
+      'nationality','nevertheless','notification','objectification','opportunities',
+      'optimization','organizational','overwhelmingly','participation','performance',
+      'personality','philosophical','productivity','pronunciation','qualification',
+      'quantification','questionnaire','reallocation','recommendation','rehabilitation',
+      'representation','responsibility','simultaneously','specification','stabilization',
+      'straightforward','stratification','subjectivity','surveillance','sustainability',
+      'synchronization','technological','transmission','transportation','understanding',
+      'unprecedented','verification','vulnerability','workmanship','extraordinarily'
+    ]
+  };
+  // Populate WORDS_FALLBACK and WORDS for any pool that's still empty
+  ['easy','medium','hard','insane'].forEach(function(lvl) {
+    if (!WORDS_FALLBACK[lvl] || WORDS_FALLBACK[lvl].length === 0) {
+      WORDS_FALLBACK[lvl] = _FB[lvl];
+    }
+    if (!WORDS[lvl] || WORDS[lvl].length === 0) {
+      WORDS[lvl] = _FB[lvl].slice();
+    }
+  });
+})();
+
 (async function loadWordLists() {
   const levels = ['easy','medium','hard','insane'];
   try {
     const results = await Promise.all(
       levels.map(async lvl => {
-        const r = await fetch('/words_' + lvl + '.json');
+        const r = await fetch('https://raw.githubusercontent.com/flytora-567/music/main/words_' + lvl + '.json');
         if (!r.ok) throw new Error('HTTP ' + r.status + ' fetching words_' + lvl + '.json');
         const ct = r.headers.get('content-type') || '';
         if (!ct.includes('json') && !ct.includes('text')) throw new Error('Unexpected content-type for words_' + lvl + '.json: ' + ct);
@@ -6690,6 +6963,12 @@ const WORDS = { easy:[], medium:[], hard:[], insane:[] };
     levels.forEach((lvl, i) => {
       WORDS_FALLBACK[lvl] = results[i];
       WORDS[lvl] = [...results[i]];
+    });
+    // Re-seed any pool that came back empty from server
+    ['easy','medium','hard','insane'].forEach(function(lvl) {
+      if (!WORDS[lvl] || WORDS[lvl].length === 0) {
+        WORDS[lvl] = WORDS_FALLBACK[lvl] && WORDS_FALLBACK[lvl].length ? WORDS_FALLBACK[lvl].slice() : [];
+      }
     });
     // Word lists loaded successfully
     document.dispatchEvent(new Event('words-loaded'));
@@ -6727,7 +7006,7 @@ let _mathUsed = { easy: new Set(), medium: new Set(), hard: new Set() };
   try {
     const results = await Promise.all(
       levels.map(async lvl => {
-        const r = await fetch('/math_' + lvl + '.json');
+        const r = await fetch('https://raw.githubusercontent.com/flytora-567/music/main/math_' + lvl + '.json');
         if (!r.ok) throw new Error('HTTP ' + r.status);
         return r.json();
       })
@@ -7682,13 +7961,20 @@ function playLobbyBGM() {
   _playAudioEl(LOBBY_TRACK, true, null);
 }
 
-// Public: switch to random game BGM — resets shuffle queue so lobby track never leads
+// Public: switch to random game BGM
+// Queue persists across games — gives true shuffle across all 19 tracks before repeats
 function playGameBGM() {
   if (!_bgmEnabled) return;
+  const wasGame = (_bgmMode === 'game');
   _bgmMode = 'game';
-  // Always start a fresh shuffle on game entry; prevents lobby track from appearing first
-  _bgmQueue   = [];
-  _bgmLastUrl = LOBBY_TRACK; // treat lobby track as "just played" so it can't be picked first
+  // If already playing a game track (e.g. instant restart), let it continue uninterrupted
+  if (wasGame && _bgmEl && !_bgmEl.paused) return;
+  // Coming from lobby: keep existing queue (don't reshuffle) so we never restart
+  // the same track that just played. Only seed last-url to exclude lobby track.
+  if (_bgmLastUrl === LOBBY_TRACK || _bgmLastUrl === '') {
+    // Fresh entry from lobby — ensure lobby track can't be next pick
+    _bgmLastUrl = LOBBY_TRACK;
+  }
   _startGameBGMChain();
 }
 
@@ -9243,6 +9529,8 @@ $id('pause-quit-btn').addEventListener('click', () => {
   running = false; window.running = false;
   paused  = false;
   G = null; window.G = null;
+  document.body.classList.remove('playing');
+  document.documentElement.style.setProperty('--ad-bottom-height', '90px');
   // Hide pause overlay explicitly so it cannot bleed into the next game
   const po = $id('pause-overlay');
   if (po) po.classList.add('hidden');
@@ -9930,11 +10218,15 @@ function startGame() {
     powerupsUsed:0, freezeUses:0, uniquePowerupsThisGame:new Set(), allSlotsFull:false,
     doubleActive:false, doubleScore:0, clutchWord:false, comebackKid:false,
     revivedThisRun:false, revivedAndScored:false, deathsThisRun:0,
+    wpmTimeline:[], errTimeline:[], mathTimeline:[],
   };
   
   updateLivesDisplay(); running=true; paused=false;
   window.G = G;         // expose for bot engine
   window.running = true; // expose for bot engine
+  // Mark body as playing — hides banner ad, expands game to fullscreen
+  document.body.classList.add('playing');
+  document.documentElement.style.setProperty('--ad-bottom-height', '0px');
   // Switch to game BGM — retry on first user interaction in case autoplay is blocked
   stopMenuHum();
   setBGM('bgm_game');
@@ -9948,6 +10240,7 @@ function startGame() {
   }, 300);
   $id('pause-overlay').classList.add('hidden');
   typeInp.value=''; typeInp.placeholder='waiting…'; typeInp.className='';
+  if (typeof _updateWordPreview === 'function') _updateWordPreview();
   // Reset math used-set for fresh game
   if (typeof _mathUsed !== 'undefined') { Object.keys(_mathUsed).forEach(k => _mathUsed[k].clear()); }
   $id('hud-score').textContent='0'; $id('hud-coins-live').textContent='🪙 '+SAVE.coins;
@@ -10033,7 +10326,12 @@ function babyWord() {
 }
 
 function rndWord() {
-  const poolKey = DIFF[G.diff] ? DIFF[G.diff].pool : DIFF[selDiff].pool, pool = WORDS[poolKey], used = usedWords[poolKey];
+  const poolKey = DIFF[G.diff] ? DIFF[G.diff].pool : DIFF[selDiff].pool;
+  let pool = WORDS[poolKey];
+  // Guard: if pool empty fall back to easy words
+  if (!pool || pool.length === 0) pool = WORDS.easy;
+  if (!pool || pool.length === 0) pool = ['fly','run','hop','sit','top','red','big','cat','dog','sun'];
+  const used = usedWords[poolKey];
   const available = pool.filter(w=>!used.has(w));
   if (available.length < 5) { const recent=[...used].slice(-5); used.clear(); recent.forEach(w=>used.add(w)); const fresh=pool.filter(w=>!used.has(w)); const word=fresh[Math.floor(Math.random()*fresh.length)]||pool[0]; used.add(word); return word; }
   const word = available[Math.floor(Math.random()*available.length)]; used.add(word); return word;
@@ -10193,9 +10491,9 @@ function update(dt) {
       o.splitAnim = Math.min(1, o.splitAnim+dt*2);
       const ease = 1-Math.pow(1-o.splitAnim,3);
       o.gapY = o.origGapY - ease*300; o.gapH = o.origGapH + ease*600;
-      if (o.splitAnim>=1) { if (G.active===o) { G.active=null; G.typed=''; typeInp.value=''; } G.obs.splice(i,1); continue; }
+      if (o.splitAnim>=1) { if (G.active===o) { G.active=null; G.typed=''; typeInp.value=''; if(typeof _updateWordPreview==='function')_updateWordPreview(); } G.obs.splice(i,1); continue; }
     }
-    if (o.x+o.w<-20) { if (G.active===o) { G.active=null; G.typed=''; typeInp.value=''; } G.obs.splice(i,1); continue; }
+    if (o.x+o.w<-20) { if (G.active===o) { G.active=null; G.typed=''; typeInp.value=''; if(typeof _updateWordPreview==='function')_updateWordPreview(); } G.obs.splice(i,1); continue; }
     if (!o.done) {
       const bx=b.x,by=b.y,br=16;
       if (bx+br>o.x && bx-br<o.x+o.w) {
@@ -10228,6 +10526,7 @@ function update(dt) {
   if (G.active!==nearest) {
     G.active=nearest; G.typed=''; typeInp.value='';
     if (nearest) { nearest.typed=''; typeInp.placeholder = (nearest.mathProblem ? 'Answer…' : nearest.word); } else typeInp.placeholder='waiting…';
+    if (typeof _updateWordPreview === 'function') _updateWordPreview();
   }
   if (G.active) {
     const gc=G.active.gapY+G.active.gapH/2, dist=gc-b.y;
@@ -10383,25 +10682,52 @@ function renderStashBar() {
   }
 }
 
+// ── WORD PREVIEW — syncs word-bg div behind real input ──
+// The div shows: [transparent typed chars][dim remaining chars]
+// The real input (transparent bg) shows: [bright typed chars][nothing]
+// Together they look like one input with dim preview of remaining word.
+const _wplEl = document.getElementById('word-bg');
+function _updateWordPreview() {
+  if (!_wplEl) return;
+  const obs = G && G.active;
+  if (!obs) {
+    _wplEl.innerHTML = '';
+    return;
+  }
+  if (selGameType === 'math' && obs.mathProblem) {
+    // In math mode: no split needed, just show question dimly as placeholder covers it
+    _wplEl.innerHTML = '';
+    return;
+  }
+  const word = obs.word || '';
+  const typed = (G.typed || '').toLowerCase();
+  const n = Math.min(typed.length, word.length);
+  // Typed portion: transparent (real input text sits visually on top)
+  // Remaining portion: dim colour
+  const typedPart = word.slice(0, n);
+  const remaining = word.slice(n);
+  // Use a non-breaking space trick so zero-width typed part still takes up exact character widths
+  _wplEl.innerHTML =
+    '<span style="color:transparent">' + typedPart + '</span>' +
+    '<span class="wb-remain">' + remaining + '</span>';
+}
+
 // ── INPUT ──
 typeInp.addEventListener('input', () => {
   if (!running||paused||!G||!G.bird.alive) return;
   const obs = G.active;
-  if (!obs) { typeInp.value=''; return; }
+  if (!obs) { typeInp.value=''; _updateWordPreview(); return; }
 
   // ── MATH MODE ──────────────────────────────────────────
   if (selGameType === 'math' && obs.mathProblem) {
     const raw = typeInp.value.trim();
-    // Only allow digits and optional leading minus
     const cleaned = raw.replace(/[^0-9-]/g, '');
     if (typeInp.value !== cleaned) { typeInp.value = cleaned; return; }
-    // Reject non-integer characters silently
     const numVal = parseInt(cleaned, 10);
     const correct = obs.mathProblem.a;
-    // Update typed display for partial
     G.typed = cleaned; obs.typed = cleaned;
+    _updateWordPreview();
     sndKey();
-    // Check if answer matches
     if (!isNaN(numVal) && numVal === correct) {
       G.totalKeys += cleaned.length;
       const isDouble = hasPowerup('double');
@@ -10414,17 +10740,17 @@ typeInp.addEventListener('input', () => {
     return;
   }
 
-  // ── TYPING MODE (original logic) ────────────────────────
+  // ── TYPING MODE ────────────────────────────────────────
   const val = typeInp.value.toLowerCase();
   if (obs.word.startsWith(val)) {
-    G.totalKeys++; // Issue 1 fix: only count accepted chars, not rejected ones
+    G.totalKeys++;
     updateTypeInputClass();
     G.typed=val; obs.typed=val; sndKey();
+    _updateWordPreview();
     if (val===obs.word) {
-      // FIX 3: Satisfying word-complete visual hit on the input box
       const isDouble = hasPowerup('double');
       typeInp.classList.remove('word-complete','word-complete-double');
-      void typeInp.offsetHeight; // force reflow so animation restarts
+      void typeInp.offsetHeight;
       typeInp.classList.add(isDouble ? 'word-complete-double' : 'word-complete');
       setTimeout(() => {
         typeInp.classList.remove('word-complete','word-complete-double');
@@ -10436,6 +10762,7 @@ typeInp.addEventListener('input', () => {
     G.errKeys++; sndError(); G.combo=0; G.errFlash=0.22;
     typeInp.classList.add('err'); setTimeout(()=>typeInp.classList.remove('err'),280);
     typeInp.value=val.slice(0,-1); G.typed=typeInp.value; obs.typed=G.typed;
+    _updateWordPreview();
   }
 });
 typeInp.addEventListener('paste', e => e.preventDefault());
@@ -10544,8 +10871,19 @@ function completeWord(obs) {
   G.bird.vy = -5.5;
   if (G.combo>=2) { sndCombo(G.combo); if (G.combo>=5) ring(G.bird.x,G.bird.y,'#e8c87a'); }
   typeInp.value=''; G.typed=''; G.active=null;
+  if (typeof _updateWordPreview === 'function') _updateWordPreview();
   updateDailyProgress(); // Fix 3: per-word, not per-frame
   const elapsed=(Date.now()-G.startMs)/1000;
+  // Record WPM + error snapshot for results chart
+  if (elapsed > 0) {
+    const _snap_wpm = Math.round(G.words / (elapsed / 60));
+    const _snap_acc = G.totalKeys > 0 ? Math.round(((G.totalKeys - G.errKeys) / G.totalKeys) * 100) : 100;
+    G.wpmTimeline.push({ t: elapsed, wpm: _snap_wpm, acc: _snap_acc, words: G.words });
+    G.errTimeline.push({ t: elapsed, err: G.errKeys });
+    if (selGameType === 'math') {
+      G.mathTimeline.push({ t: elapsed, correct: G.words, errors: G.errKeys, combo: G.combo });
+    }
+  }
   // Fix 2: throttle achievement checks — scan at most every 2s, not every word
   const _achNow = Date.now();
   if (_achNow - (completeWord._lastAchCheck || 0) > 2000) {
@@ -10572,6 +10910,7 @@ function triggerDeath(timesUp) {
   running = false;
   window.running = false;
   document.body.classList.remove("playing");
+  document.documentElement.style.setProperty('--ad-bottom-height', '90px');
   // Restart bot preview loop paused during gameplay
   setTimeout(() => { if (typeof _previewRaf !== 'undefined' && !_previewRaf) { _previewT = 0; _runPreviews(); } if (typeof _skinPreviewList !== 'undefined' && _skinPreviewList.length > 0 && !_skinPreviewRAF) startSkinPreviewLoop(); if (typeof _trailPreviewList !== 'undefined' && _trailPreviewList.length > 0 && !_trailPreviewRAF) startTrailPreviewLoop(); }, 300);
 
@@ -11494,7 +11833,8 @@ window.triggerDeath=function(timesUp){
   const prevBest=(window._prevBestBeforeRun&&window._prevBestBeforeRun[G.diff])||0;
   // Only flag isNew / award achievements when the player actually scored something
   // FIX: strict > (not >=) so equal scores never trigger "new best"
-  const isNew = G.score > 0 && G.score > prevBest && prevBest >= 0;
+  // FIX2: prevBest must be > 0 — first run on a difficulty has nothing to beat
+  const isNew = G.score > 0 && prevBest > 0 && G.score > prevBest;
   if(isNew) SAVE.hs[G.diff] = G.score;
   const bonusCoins=Math.floor(G.score*(({easy:1,medium:1.5,hard:2,insane:3}[G.diff]||1))/50);
   let totalRunCoins=(G.coinsThisRun||0)+bonusCoins;
@@ -11522,7 +11862,9 @@ window.triggerDeath=function(timesUp){
     timesUp, score:G.score, words:G.words, peakWpm:G.peakWpm, maxCombo:G.maxCombo,
     diff:G.diff, mode:G.mode, isNew, newAch, grade, totalRunCoins,
     accuracy:_accuracy, elapsed:finalStats.time,
-    bestScore: SAVE.hs[G.diff] || 0
+    bestScore: SAVE.hs[G.diff] || 0,
+    wpmTimeline: G.wpmTimeline||[], errTimeline: G.errTimeline||[], mathTimeline: G.mathTimeline||[],
+    totalKeys: G.totalKeys||0, errKeys: G.errKeys||0, gameType: selGameType||'typing'
   };
   checkAwardChest();
   if(SAVE._trialSkin&&!SAVE.ownedSkins.includes(SAVE._trialSkin)){SAVE.skin=SAVE._trialSkinPrev||'classic';delete SAVE._trialSkin;delete SAVE._trialSkinPrev;savePersist();}
@@ -11532,6 +11874,7 @@ window.triggerDeath=function(timesUp){
 
 function showNormalGameOver(){
   if(!_gameOverPayload)return;
+  window._gameOverPayload2 = Object.assign({}, _gameOverPayload);
   const p=_gameOverPayload;
   const _sg = (id) => document.getElementById(id);
   const _st = (id, val) => { const el=_sg(id); if(el) el.textContent=val; };
@@ -11545,7 +11888,7 @@ function showNormalGameOver(){
   _st('go-time', Math.round(p.elapsed||0)+'s');
   const gradeEl=_sg('go-grade'); if(gradeEl){gradeEl.textContent=p.grade;gradeEl.className='grade-display grade-'+p.grade;}
   _st('go-coins-earned', '🪙 +'+p.totalRunCoins+' COINS');
-  const nbEl=_sg('new-best-badge'); if(nbEl) nbEl.classList.toggle('hidden',!p.isNew);
+  // new-best-badge removed
   const achEl=_sg('ach-badge'); if(achEl){achEl.classList.toggle('hidden',!p.newAch); if(p.newAch)achEl.textContent='🏆 '+p.newAch.name+' Unlocked!';}
   const rvBtn=_sg('btn-revive'); if(rvBtn) rvBtn.style.display='none';
   show('gameover-screen');
@@ -18434,7 +18777,7 @@ body.tf-debug #tf-sync-badge { display: block !important; }
           _t('go-words',(g&&g.words)||0); _t('go-wpm',(g&&g.peakWpm)||0); _t('go-combo',(g&&g.maxCombo)||0);
           _t('go-accuracy',accuracy+'%'); _t('go-time',elapsed+'s'); _t('go-coins-earned','🪙 +0 COINS');
           var grEl=document.getElementById('go-grade'); if(grEl){grEl.textContent=grade;grEl.className='grade-display grade-'+grade;}
-          _c('new-best-badge','hidden',true); _c('ach-badge','hidden',true);
+          _c('ach-badge','hidden',true);
           var rvBtn=document.getElementById('btn-revive'); if(rvBtn) rvBtn.style.display='none';
           var screens=document.querySelectorAll('.screen');
           screens.forEach(function(s){s.classList.add('hidden');});
@@ -19850,16 +20193,7 @@ body.tf-debug #tf-sync-badge { display: block !important; }
   border-top:1px solid rgba(93,184,232,.12);
   overflow:hidden;
 ">
-  <script>
-    atOptions = {
-      'key' : 'e969a7d1dc236d8ad27e08af79647122',
-      'format' : 'iframe',
-      'height' : 90,
-      'width' : 728,
-      'params' : {}
-    };
-  </script>
-  <script src="https://www.highperformanceformat.com/e969a7d1dc236d8ad27e08af79647122/invoke.js"></script>
+  <div id="hpf-banner-slot" style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;"></div>
 </div>
 
 <!-- ═══ COOKIE CONSENT BANNER (required for Google AdSense / GDPR) ═══ -->
@@ -19890,7 +20224,181 @@ body.tf-debug #tf-sync-badge { display: block !important; }
     </button>
   </div>
 </div>
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
+// ═══════════════════════════════════════════════════════════════
+// FLYTORA AD MANAGER
+// • Bottom banner (728×90): shown ONLY on non-game screens
+//   Refreshes on screen/tab changes, throttled to 20s minimum
+// • Result ad (320×50): shown ONLY when gameover-screen is visible
+//   Refreshes every time a new result appears
+// ═══════════════════════════════════════════════════════════════
+(function() {
+  var BANNER_KEY  = 'e969a7d1dc236d8ad27e08af79647122';
+  var RESULT_KEY  = 'd13656b3bdc72002ff582837d3f79c97';
+  var MIN_REFRESH = 20000; // 20 seconds between banner refreshes
+
+  var _lastBannerRefresh = 0;
+  var _bannerThrottle    = null;
+
+  // ── Inject an HPF ad into a slot element ──
+  function _injectAd(slotEl, key, width, height) {
+    if (!slotEl) return;
+    // Use sandboxed iframe so each ad's atOptions is fully isolated — no collision between slots
+    slotEl.innerHTML = '';
+    var doc = [
+      '<!DOCTYPE html><html><head>',
+      '<style>*{margin:0;padding:0;overflow:hidden;}</style>',
+      '</head><body>',
+      '<script>atOptions={"key":"' + key + '","format":"iframe","height":' + height + ',"width":' + width + ',"params":{}};' + '<\/script>',
+      '<script src="https://www.highperformanceformat.com/' + key + '/invoke.js"><\/script>',
+      '</body></html>'
+    ].join('');
+    var fr = document.createElement('iframe');
+    fr.style.cssText = 'width:' + width + 'px;height:' + height + 'px;border:0;display:block;overflow:hidden;';
+    fr.setAttribute('scrolling', 'no');
+    fr.setAttribute('frameborder', '0');
+    fr.srcdoc = doc;
+    slotEl.appendChild(fr);
+  }
+
+  // ── Banner refresh (with 20-second throttle) ──
+  function refreshBanner(force) {
+    var now = Date.now();
+    if (!force && (now - _lastBannerRefresh) < MIN_REFRESH) {
+      // Schedule a deferred refresh to fire when the throttle expires
+      if (_bannerThrottle) clearTimeout(_bannerThrottle);
+      var delay = MIN_REFRESH - (now - _lastBannerRefresh);
+      _bannerThrottle = setTimeout(function() { refreshBanner(true); }, delay);
+      return;
+    }
+    _lastBannerRefresh = Date.now();
+    if (_bannerThrottle) { clearTimeout(_bannerThrottle); _bannerThrottle = null; }
+    _injectAd(document.getElementById('hpf-banner-slot'), BANNER_KEY, 728, 90);
+  }
+
+  // ── Result ad refresh (always fresh, no throttle — each result is a new impression) ──
+  function refreshResultAd() {
+    _injectAd(document.getElementById('hpf-result-slot'), RESULT_KEY, 320, 50);
+    // Push refresh to magsrv side ads
+    _refreshSideAds();
+  }
+
+  // ── HPF 160×600 side ads ──
+  var SIDE_KEY  = '6ca7cca69f7e02b10e82aea4c4c94a64';
+  var _sideTimer = null;
+  var _allAdsTimer = null;          // 30s refresh for ALL ads on result screen
+  var _bannerTimer = null;          // 30s refresh for banner on menu screen
+  var AD_REFRESH_MS  = 30000;       // refresh every 30s
+  var AD_MIN_GAP_MS  = 20000;       // never faster than 20s
+
+  function _refreshSideAds() {
+    _injectAd(document.getElementById('go-ad-left-slot'),  SIDE_KEY, 160, 600);
+    _injectAd(document.getElementById('go-ad-right-slot'), SIDE_KEY, 160, 600);
+  }
+
+  // Refresh every ad visible on the result screen (side + top result slot)
+  function _startResultAdCycle() {
+    if (_allAdsTimer) clearInterval(_allAdsTimer);
+    _allAdsTimer = setInterval(function() {
+      var goScreen = document.getElementById('gameover-screen');
+      if (!goScreen || goScreen.classList.contains('hidden')) {
+        clearInterval(_allAdsTimer); _allAdsTimer = null; return;
+      }
+      // Top result ad (320x50)
+      _injectAd(document.getElementById('hpf-result-slot'), RESULT_KEY, 320, 50);
+      // Side ads (160x600)
+      _refreshSideAds();
+    }, AD_REFRESH_MS);
+  }
+
+  // Refresh banner every 30s while on menu (respects 20s min-gap via existing throttle)
+  function _startBannerCycle() {
+    if (_bannerTimer) clearInterval(_bannerTimer);
+    _bannerTimer = setInterval(function() {
+      var menuScreen = document.getElementById('menu-screen');
+      if (!menuScreen || menuScreen.classList.contains('hidden')) {
+        clearInterval(_bannerTimer); _bannerTimer = null; return;
+      }
+      refreshBanner(false); // uses existing 20s throttle
+    }, AD_REFRESH_MS);
+  }
+
+  // ── Show/hide banner based on whether game is active ──
+  function _updateBannerVisibility(screenId) {
+    var banner = document.getElementById('adsense-bottom-banner');
+    if (!banner) return;
+    if (screenId === 'game-screen') {
+      banner.style.display = 'none';
+      // Zero out the CSS variable so .screen bottom offset disappears completely
+      document.documentElement.style.setProperty('--ad-bottom-height', '0px');
+    } else {
+      banner.style.display = 'flex';
+      document.documentElement.style.setProperty('--ad-bottom-height', '90px');
+    }
+  }
+
+  // ── Patch the show() function to handle banner & refresh ──
+  var _origShow = window.show;
+  window.show = function(id) {
+    if (_origShow) _origShow(id);
+    // Remove playing class on any non-game screen so CSS banner rules reset
+    if (id !== 'game-screen') {
+      document.body.classList.remove('playing');
+    }
+    _updateBannerVisibility(id);
+
+    if (id === 'menu-screen') {
+      // Coming back to menu — refresh banner + start 30s cycle
+      refreshBanner(false);
+      _startBannerCycle();
+    } else if (id === 'gameover-screen') {
+      // Result screen appeared — inject fresh result ad + start 30s refresh cycle
+      refreshResultAd();
+      _refreshSideAds();
+      _startResultAdCycle();
+      // Show banner on result screen (game is over, not playing)
+      _updateBannerVisibility('gameover-screen');
+    }
+    // Hide result ad when not on gameover screen
+    var resultCtn = document.getElementById('result-ad-container');
+    if (resultCtn) resultCtn.style.display = (id === 'gameover-screen') ? 'flex' : 'none';
+    // Show/hide side ads with result screen (only on wide viewports — CSS handles narrow)
+    ['go-ad-left','go-ad-right'].forEach(function(sid) {
+      var el = document.getElementById(sid);
+      if (!el) return;
+      el.style.display = (id === 'gameover-screen' && window.innerWidth >= 980) ? 'flex' : 'none';
+    });
+  };
+
+  // ── Tab/section change inside menu → refresh banner (throttled) ──
+  document.addEventListener('click', function(e) {
+    var btn = e.target.closest('.nav-btn[data-tab], .mob-nav-btn[data-tab], .menu-tab[data-tab]');
+    if (!btn) return;
+    refreshBanner(false);
+  }, true);
+
+  // ── Initial load: inject banner immediately, hide result ad ──
+  function _init() {
+    // Initial banner injection (no throttle on first load)
+    refreshBanner(true);
+    // Hide result ad container until a result screen appears
+    var resultCtn = document.getElementById('result-ad-container');
+    if (resultCtn) resultCtn.style.display = 'none';
+    // Ensure banner is shown on menu at start
+    _updateBannerVisibility('menu-screen');
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _init);
+  } else {
+    _init();
+  }
+
+  // Expose for external use if needed
+  window._adManager = { refreshBanner: refreshBanner, refreshResultAd: refreshResultAd };
+})();
+</script>
+<script>
 // Hide cookie banner if already accepted
 (function(){
   try { if(localStorage.getItem('flytora_cookie_consent')==='1') document.getElementById('cookie-consent-banner').style.display='none'; } catch(e){}
@@ -20497,5 +21005,523 @@ body.tf-debug #tf-sync-badge { display: block !important; }
 })();
 
 </script>
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   FLYTORA RICH RESULTS v1.0
+   Monkeytype-style deep results for Typing & Math modes
+═══════════════════════════════════════════════════════ */
+(function() {
+'use strict';
+
+const STYLE = `
+#go-rich-panel { width:100%; font-family:'DM Mono',monospace; }
+
+.rr-chart-wrap {
+  width:100%; position:relative;
+  background:rgba(255,255,255,.025);
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:12px; overflow:hidden;
+  margin-bottom:.7rem;
+}
+.rr-chart-title {
+  font-family:'Raleway',sans-serif;
+  font-size:.48rem; font-weight:800;
+  letter-spacing:.22em; text-transform:uppercase;
+  color:rgba(200,215,255,.35);
+  padding:.45rem .75rem .1rem;
+}
+.rr-canvas { width:100% !important; height:130px !important; display:block; }
+
+.rr-legend {
+  display:flex; gap:.9rem; padding:.3rem .75rem .45rem;
+  flex-wrap:wrap;
+}
+.rr-leg-item {
+  display:flex; align-items:center; gap:.3rem;
+  font-family:'Raleway',sans-serif;
+  font-size:.48rem; font-weight:700;
+  letter-spacing:.1em; text-transform:uppercase;
+  color:rgba(200,215,255,.45);
+}
+.rr-leg-dot {
+  width:8px; height:8px; border-radius:50%;
+  flex-shrink:0;
+}
+
+.rr-stats-grid {
+  display:grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap:.45rem; margin-bottom:.6rem;
+}
+.rr-stats-grid.cols3 { grid-template-columns: repeat(3, 1fr); }
+.rr-stats-grid.cols5 { grid-template-columns: repeat(5, 1fr); }
+
+.rr-stat {
+  text-align:center;
+  padding:.55rem .4rem .45rem;
+  background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,255,255,.065);
+  border-radius:10px;
+  transition:border-color .2s;
+}
+.rr-stat:hover { border-color:rgba(93,184,232,.22); }
+.rr-stat-val {
+  font-family:'DM Mono',monospace;
+  font-size:1.55rem; font-weight:700;
+  line-height:1.1; color:var(--text);
+}
+.rr-stat-val.c-cyan  { color:#5db8e8; }
+.rr-stat-val.c-green { color:#7ec87e; }
+.rr-stat-val.c-gold  { color:#e8c87a; }
+.rr-stat-val.c-purple{ color:#9b7fd4; }
+.rr-stat-val.c-red   { color:#e88fa0; }
+.rr-stat-val.c-orange{ color:#e8a06a; }
+.rr-stat-label {
+  font-family:'Raleway',sans-serif;
+  font-size:.5rem; font-weight:700;
+  letter-spacing:.14em; text-transform:uppercase;
+  color:rgba(200,215,255,.38);
+  margin-top:.18rem;
+}
+
+.rr-section-label {
+  font-family:'Raleway',sans-serif;
+  font-size:.44rem; font-weight:800;
+  letter-spacing:.24em; text-transform:uppercase;
+  color:rgba(200,215,255,.22);
+  margin:.1rem 0 .35rem;
+  text-align:left; padding-left:.1rem;
+}
+
+.rr-divider {
+  width:100%; height:1px;
+  background:rgba(255,255,255,.06);
+  margin:.1rem 0 .6rem;
+}
+
+.rr-breakdown {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:.45rem .65rem;
+  background:rgba(255,255,255,.025);
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:8px; margin-bottom:.45rem;
+}
+.rr-breakdown-label {
+  font-family:'Raleway',sans-serif;
+  font-size:.5rem; font-weight:700;
+  letter-spacing:.12em; text-transform:uppercase;
+  color:rgba(200,215,255,.4);
+}
+.rr-breakdown-val {
+  font-family:'DM Mono',monospace;
+  font-size:.85rem; font-weight:700;
+}
+
+.rr-acc-bar-wrap {
+  width:100%; height:6px;
+  background:rgba(255,255,255,.07);
+  border-radius:3px; overflow:hidden;
+  margin-top:.35rem;
+}
+.rr-acc-bar-fill {
+  height:100%; border-radius:3px;
+  transition:width .8s cubic-bezier(.22,.8,.3,1);
+}
+
+/* Responsive */
+@media(max-width:420px){
+  .rr-stats-grid { grid-template-columns:repeat(2,1fr) !important; }
+  .rr-stat-val { font-size:1.2rem !important; }
+}
+`;
+
+/* ── inject styles once ── */
+(function injectStyle(){
+  if(document.getElementById('rr-style')) return;
+  const s=document.createElement('style');
+  s.id='rr-style'; s.textContent=STYLE;
+  document.head.appendChild(s);
+})();
+
+/* ── helpers ── */
+function el(tag,css,html){
+  const e=document.createElement(tag);
+  if(css) e.className=css;
+  if(html!=null) e.innerHTML=html;
+  return e;
+}
+function stat(val,label,colorClass){
+  const d=el('div','rr-stat');
+  const v=el('div','rr-stat-val '+(colorClass||''));
+  v.textContent=val;
+  const l=el('div','rr-stat-label');
+  l.textContent=label;
+  d.appendChild(v); d.appendChild(l);
+  return d;
+}
+
+/* ── Chart renderer (pure canvas, no lib needed) ── */
+function drawChart(canvas, datasets, opts){
+  const dpr = Math.min(window.devicePixelRatio||1, 2);
+  const W = canvas.parentElement.offsetWidth || 400;
+  const H = 130;
+  canvas.style.width  = W+'px';
+  canvas.style.height = H+'px';
+  canvas.width  = W*dpr;
+  canvas.height = H*dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  const PAD = { top:10, right:14, bottom:24, left:36 };
+  const cW = W - PAD.left - PAD.right;
+  const cH = H - PAD.top  - PAD.bottom;
+
+  /* background */
+  ctx.clearRect(0,0,W,H);
+
+  if(!datasets || !datasets.length || !datasets[0].points.length){
+    ctx.fillStyle='rgba(200,215,255,.15)';
+    ctx.font='700 11px DM Mono,monospace';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('Not enough data', W/2, H/2);
+    return;
+  }
+
+  /* axis ranges */
+  let minX=Infinity, maxX=-Infinity, minY=Infinity, maxY=-Infinity;
+  datasets.forEach(ds => ds.points.forEach(p => {
+    if(p.x<minX) minX=p.x; if(p.x>maxX) maxX=p.x;
+    if(p.y<minY) minY=p.y; if(p.y>maxY) maxY=p.y;
+  }));
+  if(opts && opts.minY!=null) minY=Math.min(minY,opts.minY);
+  if(opts && opts.maxY!=null) maxY=Math.max(maxY,opts.maxY);
+  minY=Math.max(0,minY-5);
+  maxY=maxY+Math.ceil(maxY*0.1)+5;
+  if(maxY===minY) maxY=minY+10;
+
+  const toX = x => PAD.left + ((x-minX)/(maxX-minX||1))*cW;
+  const toY = y => PAD.top  + (1-(y-minY)/(maxY-minY))*cH;
+
+  /* grid lines */
+  ctx.strokeStyle='rgba(255,255,255,.05)';
+  ctx.lineWidth=1;
+  const steps=4;
+  for(let i=0;i<=steps;i++){
+    const y=PAD.top+(cH/steps)*i;
+    ctx.beginPath(); ctx.moveTo(PAD.left,y); ctx.lineTo(PAD.left+cW,y); ctx.stroke();
+    const val=Math.round(maxY-((maxY-minY)/steps)*i);
+    ctx.fillStyle='rgba(200,215,255,.28)';
+    ctx.font='600 9px DM Mono,monospace';
+    ctx.textAlign='right'; ctx.textBaseline='middle';
+    ctx.fillText(val, PAD.left-4, y);
+  }
+
+  /* X-axis labels (time) */
+  ctx.fillStyle='rgba(200,215,255,.25)';
+  ctx.font='600 9px DM Mono,monospace'; ctx.textAlign='center'; ctx.textBaseline='top';
+  const xTicks = Math.min(6, datasets[0].points.length);
+  for(let i=0;i<=xTicks;i++){
+    const xVal = minX+(maxX-minX)*(i/xTicks);
+    const px = PAD.left+cW*(i/xTicks);
+    ctx.fillText(Math.round(xVal)+'s', px, PAD.top+cH+4);
+  }
+
+  /* each dataset */
+  datasets.forEach(ds => {
+    if(!ds.points.length) return;
+    const pts = ds.points;
+
+    if(ds.type==='bar'){
+      const bW = Math.max(2, cW/pts.length*0.6);
+      pts.forEach(p=>{
+        const bx=toX(p.x)-bW/2;
+        const by=toY(p.y);
+        const bh=Math.max(1, toY(minY)-by);
+        ctx.fillStyle=ds.color||'rgba(93,184,232,.5)';
+        ctx.beginPath();
+        ctx.roundRect(bx, by, bW, bh, 2);
+        ctx.fill();
+      });
+      return;
+    }
+
+    /* area fill */
+    if(ds.fill){
+      ctx.beginPath();
+      ctx.moveTo(toX(pts[0].x), toY(minY));
+      pts.forEach(p=>ctx.lineTo(toX(p.x),toY(p.y)));
+      ctx.lineTo(toX(pts[pts.length-1].x), toY(minY));
+      ctx.closePath();
+      const grad=ctx.createLinearGradient(0,PAD.top,0,PAD.top+cH);
+      grad.addColorStop(0, ds.fill+'33');
+      grad.addColorStop(1, ds.fill+'00');
+      ctx.fillStyle=grad;
+      ctx.fill();
+    }
+
+    /* line */
+    ctx.beginPath();
+    pts.forEach((p,i)=>i===0?ctx.moveTo(toX(p.x),toY(p.y)):ctx.lineTo(toX(p.x),toY(p.y)));
+    ctx.strokeStyle=ds.color||'#5db8e8';
+    ctx.lineWidth=ds.lineWidth||2;
+    ctx.lineJoin='round'; ctx.lineCap='round';
+    ctx.stroke();
+
+    /* dots */
+    if(ds.dots!==false){
+      pts.forEach(p=>{
+        ctx.beginPath();
+        ctx.arc(toX(p.x),toY(p.y),2.5,0,Math.PI*2);
+        ctx.fillStyle=ds.color||'#5db8e8';
+        ctx.fill();
+      });
+    }
+  });
+}
+
+/* ── TYPING mode results ── */
+function buildTypingResults(p, panel){
+  panel.innerHTML='';
+
+  const wt = p.wpmTimeline || [];
+  const elapsed = Math.round(p.elapsed||0);
+  const accuracy = p.accuracy||0;
+  const errKeys = p.errKeys||0;
+  const totalKeys = p.totalKeys||0;
+  const consistency = calcConsistency(wt);
+
+  /* ── Chart ── */
+  const chartWrap = el('div','rr-chart-wrap');
+  const chartTitle = el('div','rr-chart-title','WPM over time');
+  const canvas = document.createElement('canvas');
+  canvas.className='rr-canvas';
+  const legend = el('div','rr-legend',
+    '<div class="rr-leg-item"><div class="rr-leg-dot" style="background:#5db8e8"></div>WPM</div>'+
+    '<div class="rr-leg-item"><div class="rr-leg-dot" style="background:#e88fa0"></div>Errors</div>'+
+    '<div class="rr-leg-item"><div class="rr-leg-dot" style="background:#7ec87e"></div>Accuracy %</div>'
+  );
+  chartWrap.appendChild(chartTitle);
+  chartWrap.appendChild(canvas);
+  chartWrap.appendChild(legend);
+  panel.appendChild(chartWrap);
+
+  /* draw after layout */
+  requestAnimationFrame(()=>{
+    const wpmPts  = wt.map(s=>({x:Math.round(s.t), y:s.wpm}));
+    const accPts  = wt.map(s=>({x:Math.round(s.t), y:s.acc}));
+
+    /* error bars: count new errors between snapshots */
+    let prevErr=0;
+    const errPts = (p.errTimeline||[]).map(s=>{
+      const delta=s.err-prevErr; prevErr=s.err;
+      return {x:Math.round(s.t), y:Math.max(0,delta)};
+    });
+
+    drawChart(canvas, [
+      { points:wpmPts,  color:'#5db8e8', fill:'#5db8e8', lineWidth:2.5, dots:wt.length<=20 },
+      { points:accPts,  color:'#7ec87e', lineWidth:1.5, dots:false },
+      { points:errPts,  color:'#e88fa0', type:'bar' },
+    ], { minY:0 });
+  });
+
+  /* ── Primary stats row ── */
+  const g1 = el('div','rr-stats-grid cols5');
+  g1.appendChild(stat(p.peakWpm||0,  'Peak WPM',  'c-cyan'));
+  g1.appendChild(stat(accuracy+'%',  'Accuracy',  accuracy>=95?'c-green':accuracy>=80?'c-gold':'c-red'));
+  g1.appendChild(stat(p.score||0,    'Score',     'c-cyan'));
+  g1.appendChild(stat(p.words||0,    'Words',     'c-green'));
+  g1.appendChild(stat(elapsed+'s',   'Time',      'c-gold'));
+  panel.appendChild(g1);
+
+  /* ── Secondary stats row ── */
+  const g2 = el('div','rr-stats-grid');
+  g2.appendChild(stat(p.maxCombo||0,         'Max Combo', 'c-gold'));
+  g2.appendChild(stat(consistency+'%',        'Consistency','c-purple'));
+  g2.appendChild(stat(errKeys,               'Errors',    errKeys>5?'c-red':'c-orange'));
+  g2.appendChild(stat(p.bestScore||0,        'Best Score','c-gold'));
+  panel.appendChild(g2);
+
+  /* ── Accuracy bar ── */
+  const abDiv = el('div','rr-breakdown');
+  abDiv.innerHTML = `
+    <div>
+      <div class="rr-breakdown-label">Accuracy breakdown</div>
+      <div class="rr-acc-bar-wrap" style="width:180px">
+        <div class="rr-acc-bar-fill" id="rr-acc-fill" style="width:0%;background:${accuracy>=95?'#7ec87e':accuracy>=80?'#e8c87a':'#e88fa0'}"></div>
+      </div>
+    </div>
+    <div style="text-align:right">
+      <div class="rr-breakdown-val" style="color:#7ec87e">${totalKeys-errKeys} <span style="font-size:.6rem;color:rgba(200,215,255,.35)">correct</span></div>
+      <div class="rr-breakdown-val" style="color:#e88fa0">${errKeys} <span style="font-size:.6rem;color:rgba(200,215,255,.35)">errors</span></div>
+    </div>`;
+  panel.appendChild(abDiv);
+  setTimeout(()=>{ const f=document.getElementById('rr-acc-fill'); if(f) f.style.width=accuracy+'%'; },80);
+
+  /* ── Avg WPM ── */
+  const avgWpm = wt.length ? Math.round(wt.reduce((s,x)=>s+x.wpm,0)/wt.length) : 0;
+  const fastWord = wt.length ? Math.max(...wt.map(x=>x.wpm)) : 0;
+  const slowWord = wt.length ? Math.min(...wt.map(x=>x.wpm)) : 0;
+  const g3 = el('div','rr-stats-grid cols3');
+  g3.appendChild(stat(avgWpm,    'Avg WPM',  'c-cyan'));
+  g3.appendChild(stat(fastWord,  'Peak',     'c-green'));
+  g3.appendChild(stat(slowWord,  'Lowest',   'c-orange'));
+  panel.appendChild(el('div','rr-section-label','Performance Detail'));
+  panel.appendChild(g3);
+}
+
+/* ── MATH mode results ── */
+function buildMathResults(p, panel){
+  panel.innerHTML='';
+
+  const mt = p.mathTimeline || [];
+  const elapsed = Math.round(p.elapsed||0);
+  const accuracy = p.accuracy||0;
+  const errKeys  = p.errKeys||0;
+  const totalKeys= p.totalKeys||0;
+  const correct  = p.words||0;
+  const wrongAttempts = errKeys;
+  const totalAttempts = correct + wrongAttempts;
+  const rate = elapsed > 0 ? (correct / (elapsed / 60)).toFixed(1) : 0;
+
+  /* ── Chart ── */
+  const chartWrap = el('div','rr-chart-wrap');
+  chartWrap.appendChild(el('div','rr-chart-title','Problems solved over time'));
+  const canvas = document.createElement('canvas');
+  canvas.className='rr-canvas';
+  const legend = el('div','rr-legend',
+    '<div class="rr-leg-item"><div class="rr-leg-dot" style="background:#7ec87e"></div>Correct</div>'+
+    '<div class="rr-leg-item"><div class="rr-leg-dot" style="background:#e88fa0"></div>Wrong tries</div>'+
+    '<div class="rr-leg-item"><div class="rr-leg-dot" style="background:#e8c87a"></div>Combo</div>'
+  );
+  chartWrap.appendChild(canvas);
+  chartWrap.appendChild(legend);
+  panel.appendChild(chartWrap);
+
+  requestAnimationFrame(()=>{
+    const correctPts = mt.map(s=>({x:Math.round(s.t), y:s.correct}));
+    let prevErr2=0;
+    const errPts = mt.map(s=>{
+      const delta=s.errors-prevErr2; prevErr2=s.errors;
+      return {x:Math.round(s.t), y:Math.max(0,delta)};
+    });
+    const comboPts = mt.map(s=>({x:Math.round(s.t), y:s.combo}));
+
+    drawChart(canvas, [
+      { points:correctPts, color:'#7ec87e', fill:'#7ec87e', lineWidth:2.5, dots:mt.length<=20 },
+      { points:errPts,     color:'#e88fa0', type:'bar' },
+      { points:comboPts,   color:'#e8c87a', lineWidth:1.5, dots:false },
+    ], { minY:0 });
+  });
+
+  /* ── Primary stats ── */
+  const g1 = el('div','rr-stats-grid cols5');
+  g1.appendChild(stat(correct,         'Solved',     'c-green'));
+  g1.appendChild(stat(accuracy+'%',    'Accuracy',   accuracy>=95?'c-green':accuracy>=80?'c-gold':'c-red'));
+  g1.appendChild(stat(rate,            'Prob/min',   'c-cyan'));
+  g1.appendChild(stat(p.maxCombo||0,   'Max Combo',  'c-gold'));
+  g1.appendChild(stat(elapsed+'s',     'Time',       'c-gold'));
+  panel.appendChild(g1);
+
+  /* ── Secondary stats ── */
+  const g2 = el('div','rr-stats-grid');
+  g2.appendChild(stat(p.score||0,        'Score',       'c-cyan'));
+  g2.appendChild(stat(wrongAttempts,     'Wrong',       wrongAttempts>5?'c-red':'c-orange'));
+  g2.appendChild(stat(totalAttempts,     'Attempts',    'c-purple'));
+  g2.appendChild(stat(p.bestScore||0,    'Best Score',  'c-gold'));
+  panel.appendChild(g2);
+
+  /* ── Accuracy bar ── */
+  const abDiv = el('div','rr-breakdown');
+  abDiv.innerHTML = `
+    <div>
+      <div class="rr-breakdown-label">Problem accuracy</div>
+      <div class="rr-acc-bar-wrap" style="width:180px">
+        <div class="rr-acc-bar-fill" id="rr-acc-fill" style="width:0%;background:${accuracy>=95?'#7ec87e':accuracy>=80?'#e8c87a':'#e88fa0'}"></div>
+      </div>
+    </div>
+    <div style="text-align:right">
+      <div class="rr-breakdown-val" style="color:#7ec87e">${correct} <span style="font-size:.6rem;color:rgba(200,215,255,.35)">correct</span></div>
+      <div class="rr-breakdown-val" style="color:#e88fa0">${wrongAttempts} <span style="font-size:.6rem;color:rgba(200,215,255,.35)">wrong</span></div>
+    </div>`;
+  panel.appendChild(abDiv);
+  setTimeout(()=>{ const f=document.getElementById('rr-acc-fill'); if(f) f.style.width=accuracy+'%'; },80);
+
+  /* ── Difficulty breakdown ── */
+  panel.appendChild(el('div','rr-section-label','Math Session'));
+  const g3 = el('div','rr-stats-grid cols3');
+  const firstHalf = mt.slice(0, Math.floor(mt.length/2));
+  const secondHalf = mt.slice(Math.floor(mt.length/2));
+  const r1 = firstHalf.length ? (firstHalf[firstHalf.length-1].correct - (firstHalf[0].correct||0)) : 0;
+  const r2 = secondHalf.length ? (secondHalf[secondHalf.length-1].correct - (secondHalf[0].correct||0)) : 0;
+  g3.appendChild(stat(r1, '1st Half', 'c-cyan'));
+  g3.appendChild(stat(r2, '2nd Half', r2>=r1?'c-green':'c-orange'));
+  const streak = calcMathStreak(mt);
+  g3.appendChild(stat(streak, 'Best Streak', 'c-gold'));
+  panel.appendChild(g3);
+}
+
+/* ── Helpers ── */
+function calcConsistency(timeline){
+  if(timeline.length < 3) return 100;
+  const wpms = timeline.map(x=>x.wpm);
+  const mean = wpms.reduce((a,b)=>a+b,0)/wpms.length;
+  const variance = wpms.reduce((a,b)=>a+Math.pow(b-mean,2),0)/wpms.length;
+  const cv = Math.sqrt(variance)/(mean||1);
+  return Math.max(0, Math.round((1-Math.min(cv,1))*100));
+}
+
+function calcMathStreak(timeline){
+  if(!timeline.length) return 0;
+  let best=0, cur=0, prevC=0;
+  timeline.forEach(s=>{
+    const gained=s.correct-prevC;
+    if(gained>0){ cur+=gained; if(cur>best) best=cur; }
+    else if(s.errors>0) cur=0;
+    prevC=s.correct;
+  });
+  return best;
+}
+
+/* ── Main hook into showNormalGameOver ── */
+const _prevGO = window.showNormalGameOver;
+window.showNormalGameOver = function(){
+  if(_prevGO) _prevGO();
+  const p = window._gameOverPayload2;
+  if(!p) return;
+  const panel = document.getElementById('go-rich-panel');
+  if(!panel) return;
+  if(p.gameType === 'math'){
+    buildMathResults(p, panel);
+  } else {
+    buildTypingResults(p, panel);
+  }
+};
+
+/* ── Capture payload before it's nulled ── */
+const _origTD2 = window.triggerDeath;
+window.triggerDeath = function(timesUp){
+  if(_origTD2) _origTD2(timesUp);
+};
+
+/* We need to grab _gameOverPayload after it's set.
+   Patch showNormalGameOver caller path instead — intercept via MutationObserver on gameover-screen */
+(function(){
+  const screen = document.getElementById('gameover-screen');
+  if(!screen) return;
+  const obs = new MutationObserver(()=>{
+    if(!screen.classList.contains('hidden')){
+      // gameover screen just became visible — grab payload
+      if(window._gameOverPayload){
+        window._gameOverPayload2 = Object.assign({}, window._gameOverPayload);
+      }
+    }
+  });
+  obs.observe(screen, { attributes:true, attributeFilter:['class'] });
+})();
+
+})();
+</script>
+
 </body>
 </html>
