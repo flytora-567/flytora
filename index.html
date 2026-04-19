@@ -5063,6 +5063,21 @@ body {
         <button class="mode-btn" data-mode="survival"><span class="mode-icon">❤️</span>Survival<span class="mode-desc">3 lives</span></button>
       </div>
 
+      <!-- MULTIPLAYER RACE ENTRY BUTTON -->
+      <button id="mp-entry-btn" onclick="window._openMultiplayerLobby && window._openMultiplayerLobby()" style="
+        width:100%;margin-top:.8rem;padding:.75rem 1.2rem;
+        border:1.5px solid rgba(170,68,255,.45);border-radius:12px;
+        background:linear-gradient(135deg,rgba(170,68,255,.14),rgba(93,184,232,.08));
+        color:#c4aaff;font-family:'Raleway',sans-serif;font-size:.88rem;font-weight:700;
+        letter-spacing:.08em;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.6rem;
+        transition:all .22s;box-shadow:0 0 18px rgba(170,68,255,.1);
+      " onmouseover="this.style.background='linear-gradient(135deg,rgba(170,68,255,.22),rgba(93,184,232,.12))';this.style.boxShadow='0 0 24px rgba(170,68,255,.22)'"
+         onmouseout="this.style.background='linear-gradient(135deg,rgba(170,68,255,.14),rgba(93,184,232,.08))';this.style.boxShadow='0 0 18px rgba(170,68,255,.1)'">
+        <span style="font-size:1.1rem;">🏁</span>
+        <span>MULTIPLAYER RACE</span>
+        <span style="font-size:.62rem;color:rgba(196,170,255,.6);font-weight:400;letter-spacing:.05em;">Up to 8 players</span>
+      </button>
+
       <button class="start-btn" id="start-btn">LAUNCH</button>
       <div class="hs-display"><span>★</span><span id="menu-hs">BEST: 0</span></div>
     </div>
@@ -21519,6 +21534,864 @@ window.triggerDeath = function(timesUp){
   });
   obs.observe(screen, { attributes:true, attributeFilter:['class'] });
 })();
+
+})();
+</script>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MULTIPLAYER LOBBY SCREEN
+     ═══════════════════════════════════════════════════════════════ -->
+<div id="mp-lobby-screen" class="screen hidden" style="
+  position:fixed;inset:0;z-index:9000;
+  background:radial-gradient(ellipse at 30% 20%,rgba(170,68,255,.18) 0%,transparent 55%),
+             radial-gradient(ellipse at 75% 80%,rgba(93,184,232,.12) 0%,transparent 50%),
+             #030310;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Raleway',sans-serif;
+">
+  <div id="mp-lobby-box" style="
+    width:min(480px,96vw);max-height:90vh;overflow-y:auto;
+    background:rgba(8,8,24,.92);border:1px solid rgba(170,68,255,.25);
+    border-radius:20px;padding:2rem 2rem 1.5rem;
+    box-shadow:0 0 60px rgba(170,68,255,.15);
+    scrollbar-width:thin;scrollbar-color:rgba(170,68,255,.2) transparent;
+  ">
+    <!-- Header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.6rem;">
+      <div>
+        <div style="font-family:'Cinzel',serif;font-size:1.3rem;font-weight:900;
+          background:linear-gradient(135deg,#c4aaff,#5db8e8);
+          -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+          letter-spacing:.1em;">🏁 MULTIPLAYER RACE</div>
+        <div style="font-size:.6rem;color:rgba(170,68,255,.7);letter-spacing:.2em;text-transform:uppercase;margin-top:.15rem;">Real-time typing battle</div>
+      </div>
+      <button onclick="window._closeMultiplayerLobby&&window._closeMultiplayerLobby()" style="
+        background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+        color:rgba(200,220,255,.5);font-size:1.1rem;border-radius:8px;
+        padding:.3rem .65rem;cursor:pointer;transition:all .2s;
+      " onmouseover="this.style.background='rgba(255,255,255,.12)'" onmouseout="this.style.background='rgba(255,255,255,.06)'">✕</button>
+    </div>
+
+    <!-- Step 1: Name entry -->
+    <div id="mp-step-name">
+      <div style="font-size:.65rem;color:rgba(170,68,255,.8);letter-spacing:.18em;text-transform:uppercase;margin-bottom:.5rem;">Your Display Name</div>
+      <input id="mp-name-inp" type="text" maxlength="16" placeholder="Enter your name…"
+        style="width:100%;box-sizing:border-box;padding:.7rem .9rem;border-radius:10px;
+          border:1.5px solid rgba(170,68,255,.3);background:rgba(170,68,255,.07);
+          color:#e8e0ff;font-family:'DM Mono',monospace;font-size:.9rem;outline:none;
+          transition:border-color .2s;"
+        onfocus="this.style.borderColor='rgba(170,68,255,.7)'"
+        onblur="this.style.borderColor='rgba(170,68,255,.3)'">
+      <div style="display:flex;gap:.7rem;margin-top:.9rem;">
+        <button id="mp-create-btn" onclick="window._mpCreate&&window._mpCreate()" style="
+          flex:1;padding:.7rem;border-radius:10px;border:1.5px solid rgba(170,68,255,.5);
+          background:linear-gradient(135deg,rgba(170,68,255,.2),rgba(170,68,255,.08));
+          color:#c4aaff;font-family:'Raleway',sans-serif;font-size:.82rem;font-weight:700;
+          letter-spacing:.06em;cursor:pointer;transition:all .2s;
+        " onmouseover="this.style.background='linear-gradient(135deg,rgba(170,68,255,.3),rgba(170,68,255,.14))'"
+           onmouseout="this.style.background='linear-gradient(135deg,rgba(170,68,255,.2),rgba(170,68,255,.08))'">＋ Create Room</button>
+        <button id="mp-join-btn" onclick="window._mpJoinFlow&&window._mpJoinFlow()" style="
+          flex:1;padding:.7rem;border-radius:10px;border:1.5px solid rgba(93,184,232,.5);
+          background:linear-gradient(135deg,rgba(93,184,232,.15),rgba(93,184,232,.06));
+          color:#5db8e8;font-family:'Raleway',sans-serif;font-size:.82rem;font-weight:700;
+          letter-spacing:.06em;cursor:pointer;transition:all .2s;
+        " onmouseover="this.style.background='linear-gradient(135deg,rgba(93,184,232,.25),rgba(93,184,232,.1))'"
+           onmouseout="this.style.background='linear-gradient(135deg,rgba(93,184,232,.15),rgba(93,184,232,.06))'">→ Join Room</button>
+      </div>
+    </div>
+
+    <!-- Create room panel -->
+    <div id="mp-create-panel" style="display:none;margin-top:1.2rem;">
+      <div style="border-top:1px solid rgba(170,68,255,.15);padding-top:1.2rem;">
+        <div style="font-size:.65rem;color:rgba(170,68,255,.8);letter-spacing:.18em;text-transform:uppercase;margin-bottom:.4rem;">Room Password <span style="color:rgba(200,215,255,.35);font-size:.55rem;">(optional)</span></div>
+        <input id="mp-create-pw" type="text" maxlength="20" placeholder="Leave blank for public room…"
+          style="width:100%;box-sizing:border-box;padding:.6rem .85rem;border-radius:9px;
+            border:1.5px solid rgba(170,68,255,.25);background:rgba(170,68,255,.05);
+            color:#e8e0ff;font-family:'DM Mono',monospace;font-size:.82rem;outline:none;
+            transition:border-color .2s;"
+          onfocus="this.style.borderColor='rgba(170,68,255,.6)'"
+          onblur="this.style.borderColor='rgba(170,68,255,.25)'">
+        <div style="font-size:.65rem;color:rgba(170,68,255,.8);letter-spacing:.18em;text-transform:uppercase;margin:0.8rem 0 .4rem;">Game Duration</div>
+        <div style="display:flex;gap:.5rem;">
+          <button class="mp-dur-btn active" data-dur="60" onclick="window._mpSelDur&&window._mpSelDur(60,this)" style="flex:1;padding:.5rem;border-radius:8px;border:1px solid rgba(170,68,255,.4);background:rgba(170,68,255,.18);color:#c4aaff;font-family:'DM Mono',monospace;font-size:.75rem;cursor:pointer;">60s</button>
+          <button class="mp-dur-btn" data-dur="90" onclick="window._mpSelDur&&window._mpSelDur(90,this)" style="flex:1;padding:.5rem;border-radius:8px;border:1px solid rgba(170,68,255,.2);background:transparent;color:rgba(196,170,255,.5);font-family:'DM Mono',monospace;font-size:.75rem;cursor:pointer;">90s</button>
+          <button class="mp-dur-btn" data-dur="120" onclick="window._mpSelDur&&window._mpSelDur(120,this)" style="flex:1;padding:.5rem;border-radius:8px;border:1px solid rgba(170,68,255,.2);background:transparent;color:rgba(196,170,255,.5);font-family:'DM Mono',monospace;font-size:.75rem;cursor:pointer;">120s</button>
+        </div>
+        <button onclick="window._mpConfirmCreate&&window._mpConfirmCreate()" style="
+          width:100%;margin-top:.85rem;padding:.75rem;border-radius:10px;
+          border:1.5px solid rgba(170,68,255,.6);
+          background:linear-gradient(135deg,rgba(170,68,255,.28),rgba(93,184,232,.1));
+          color:#e8e0ff;font-family:'Raleway',sans-serif;font-size:.88rem;font-weight:700;
+          letter-spacing:.08em;cursor:pointer;transition:all .2s;
+        ">🚀 Create & Enter Lobby</button>
+      </div>
+    </div>
+
+    <!-- Join room panel -->
+    <div id="mp-join-panel" style="display:none;margin-top:1.2rem;">
+      <div style="border-top:1px solid rgba(93,184,232,.15);padding-top:1.2rem;">
+        <div style="font-size:.65rem;color:rgba(93,184,232,.8);letter-spacing:.18em;text-transform:uppercase;margin-bottom:.4rem;">Room Code</div>
+        <input id="mp-join-code" type="text" maxlength="6" placeholder="Enter 6-digit code…"
+          style="width:100%;box-sizing:border-box;padding:.6rem .85rem;border-radius:9px;
+            border:1.5px solid rgba(93,184,232,.3);background:rgba(93,184,232,.05);
+            color:#e8e0ff;font-family:'DM Mono',monospace;font-size:1.1rem;letter-spacing:.2em;
+            text-align:center;outline:none;text-transform:uppercase;
+            transition:border-color .2s;"
+          onfocus="this.style.borderColor='rgba(93,184,232,.7)'"
+          onblur="this.style.borderColor='rgba(93,184,232,.3)'"
+          oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6)">
+        <div style="font-size:.65rem;color:rgba(93,184,232,.8);letter-spacing:.18em;text-transform:uppercase;margin:.8rem 0 .4rem;">Password <span style="color:rgba(200,215,255,.35);font-size:.55rem;">(if required)</span></div>
+        <input id="mp-join-pw" type="text" maxlength="20" placeholder="Leave blank if no password…"
+          style="width:100%;box-sizing:border-box;padding:.6rem .85rem;border-radius:9px;
+            border:1.5px solid rgba(93,184,232,.2);background:rgba(93,184,232,.04);
+            color:#e8e0ff;font-family:'DM Mono',monospace;font-size:.82rem;outline:none;
+            transition:border-color .2s;"
+          onfocus="this.style.borderColor='rgba(93,184,232,.5)'"
+          onblur="this.style.borderColor='rgba(93,184,232,.2)'">
+        <button onclick="window._mpConfirmJoin&&window._mpConfirmJoin()" style="
+          width:100%;margin-top:.85rem;padding:.75rem;border-radius:10px;
+          border:1.5px solid rgba(93,184,232,.6);
+          background:linear-gradient(135deg,rgba(93,184,232,.2),rgba(93,184,232,.07));
+          color:#5db8e8;font-family:'Raleway',sans-serif;font-size:.88rem;font-weight:700;
+          letter-spacing:.08em;cursor:pointer;transition:all .2s;
+        ">→ Join Room</button>
+      </div>
+    </div>
+
+    <!-- Lobby waiting room -->
+    <div id="mp-waiting-room" style="display:none;margin-top:1.2rem;">
+      <div style="border-top:1px solid rgba(170,68,255,.15);padding-top:1.2rem;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.9rem;">
+          <div>
+            <div style="font-size:.6rem;color:rgba(170,68,255,.7);letter-spacing:.18em;text-transform:uppercase;">Room Code</div>
+            <div id="mp-room-code-display" style="font-family:'DM Mono',monospace;font-size:1.5rem;font-weight:700;color:#c4aaff;letter-spacing:.25em;">------</div>
+          </div>
+          <button onclick="window._mpCopyCode&&window._mpCopyCode()" style="
+            padding:.4rem .8rem;border-radius:8px;border:1px solid rgba(170,68,255,.3);
+            background:rgba(170,68,255,.1);color:#c4aaff;font-size:.7rem;cursor:pointer;
+            font-family:'Raleway',sans-serif;transition:all .2s;
+          ">📋 Copy</button>
+        </div>
+        <div style="font-size:.6rem;color:rgba(200,215,255,.5);letter-spacing:.14em;text-transform:uppercase;margin-bottom:.5rem;">Players in Lobby <span id="mp-player-count" style="color:#c4aaff;font-family:'DM Mono',monospace;">(0/8)</span></div>
+        <div id="mp-player-list" style="
+          min-height:80px;background:rgba(170,68,255,.04);
+          border:1px solid rgba(170,68,255,.12);border-radius:10px;
+          padding:.65rem;display:flex;flex-direction:column;gap:.4rem;
+        "></div>
+        <div id="mp-host-controls" style="display:none;margin-top:1rem;">
+          <div style="font-size:.58rem;color:rgba(200,215,255,.4);text-align:center;margin-bottom:.6rem;letter-spacing:.1em;">You are the host — start when ready</div>
+          <button id="mp-start-btn" onclick="window._mpHostStart&&window._mpHostStart()" style="
+            width:100%;padding:.8rem;border-radius:11px;
+            border:1.5px solid rgba(126,200,126,.5);
+            background:linear-gradient(135deg,rgba(126,200,126,.2),rgba(126,200,126,.07));
+            color:#7ec87e;font-family:'Raleway',sans-serif;font-size:.95rem;font-weight:700;
+            letter-spacing:.08em;cursor:pointer;transition:all .2s;
+          ">▶ START RACE</button>
+        </div>
+        <div id="mp-guest-waiting" style="display:none;margin-top:.9rem;">
+          <div style="text-align:center;font-size:.75rem;color:rgba(200,215,255,.45);letter-spacing:.08em;">
+            ⏳ Waiting for host to start the race…
+          </div>
+        </div>
+        <button onclick="window._mpLeaveRoom&&window._mpLeaveRoom()" style="
+          width:100%;margin-top:.8rem;padding:.55rem;border-radius:9px;
+          border:1px solid rgba(232,143,160,.25);background:rgba(232,143,160,.06);
+          color:rgba(232,143,160,.6);font-family:'Raleway',sans-serif;font-size:.72rem;
+          cursor:pointer;transition:all .2s;letter-spacing:.06em;
+        ">✕ Leave Room</button>
+      </div>
+    </div>
+
+    <!-- Error / status message -->
+    <div id="mp-status-msg" style="
+      margin-top:.8rem;padding:.55rem .8rem;border-radius:8px;
+      font-family:'Raleway',sans-serif;font-size:.75rem;text-align:center;
+      display:none;
+    "></div>
+  </div>
+</div>
+
+<!-- Multiplayer in-game HUD overlay -->
+<div id="mp-race-hud" style="
+  display:none;position:fixed;top:12px;right:12px;z-index:8000;
+  width:min(220px,40vw);
+  background:rgba(3,3,16,.88);border:1px solid rgba(170,68,255,.3);
+  border-radius:14px;padding:.7rem .85rem;
+  box-shadow:0 4px 30px rgba(170,68,255,.15);
+  backdrop-filter:blur(12px);
+">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem;">
+    <div style="font-family:'Raleway',sans-serif;font-size:.58rem;font-weight:700;color:rgba(170,68,255,.8);letter-spacing:.18em;text-transform:uppercase;">🏁 RACE</div>
+    <div id="mp-hud-timer" style="font-family:'DM Mono',monospace;font-size:.95rem;font-weight:700;color:#e8c87a;">1:00</div>
+  </div>
+  <div id="mp-hud-players" style="display:flex;flex-direction:column;gap:.32rem;"></div>
+</div>
+
+<!-- Multiplayer end screen -->
+<div id="mp-end-screen" class="screen hidden" style="
+  position:fixed;inset:0;z-index:9500;
+  background:radial-gradient(ellipse at 50% 30%,rgba(170,68,255,.2),transparent 60%),#030310;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Raleway',sans-serif;
+">
+  <div style="
+    width:min(420px,94vw);background:rgba(8,8,24,.95);
+    border:1px solid rgba(170,68,255,.3);border-radius:20px;
+    padding:2.2rem 2rem 1.8rem;box-shadow:0 0 80px rgba(170,68,255,.2);
+    text-align:center;
+  ">
+    <div style="font-size:2.5rem;margin-bottom:.3rem;" id="mp-end-trophy">🏆</div>
+    <div style="font-family:'Cinzel',serif;font-size:1.2rem;font-weight:900;
+      background:linear-gradient(135deg,#e8c87a,#c4aaff);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+      letter-spacing:.12em;margin-bottom:.2rem;" id="mp-end-title">RACE OVER</div>
+    <div style="font-size:.62rem;color:rgba(200,215,255,.4);letter-spacing:.2em;text-transform:uppercase;margin-bottom:1.4rem;">Final Standings</div>
+    <div id="mp-end-leaderboard" style="display:flex;flex-direction:column;gap:.5rem;margin-bottom:1.6rem;"></div>
+    <div style="display:flex;gap:.7rem;">
+      <button onclick="window._mpPlayAgain&&window._mpPlayAgain()" style="
+        flex:1;padding:.7rem;border-radius:10px;
+        border:1.5px solid rgba(170,68,255,.5);
+        background:linear-gradient(135deg,rgba(170,68,255,.2),rgba(170,68,255,.08));
+        color:#c4aaff;font-family:'Raleway',sans-serif;font-size:.82rem;font-weight:700;
+        letter-spacing:.06em;cursor:pointer;
+      ">🔄 Play Again</button>
+      <button onclick="window._mpBackToMenu&&window._mpBackToMenu()" style="
+        flex:1;padding:.7rem;border-radius:10px;
+        border:1.5px solid rgba(200,215,255,.2);
+        background:rgba(255,255,255,.04);
+        color:rgba(200,215,255,.6);font-family:'Raleway',sans-serif;font-size:.82rem;font-weight:700;
+        letter-spacing:.06em;cursor:pointer;
+      ">← Menu</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MULTIPLAYER RACE ENGINE
+     ═══════════════════════════════════════════════════════════════ -->
+<script type="module">
+(async function() {
+
+// ── Imports (reuse existing Firebase app via window.FB's underlying db) ──
+// We use the same Firebase project but need access to Firestore directly.
+// Since the main module already initialized, we re-import for this scope.
+const { initializeApp, getApps } = await import("https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js");
+const { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot, deleteField, serverTimestamp }
+  = await import("https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js");
+
+const fbConfig = {
+  apiKey:"AIzaSyDfGsUEYLv765U1qYWCVoZbNoWAqb0l6H0",
+  projectId:"flytora-a3d5b",
+  storageBucket:"flytora-a3d5b.firebasestorage.app",
+  messagingSenderId:"45894521850",
+  appId:"1:45894521850:web:7e8d6d9aebc13b987bca43"
+};
+
+// Reuse existing app or create a second named one for MP
+const _mpApp = getApps().find(a => a.name==='mp') || initializeApp(fbConfig,'mp');
+const _mpDb  = getFirestore(_mpApp);
+
+// ── State ──
+let _mpUid        = null;  // local player uid (reuse from FB or generate)
+let _mpName       = 'Player';
+let _mpRoomId     = null;
+let _mpIsHost     = false;
+let _mpUnsubRoom  = null;  // firestore listener unsub
+let _mpDuration   = 60;    // seconds
+let _mpRoomData   = null;
+let _mpGameActive = false;
+let _mpSyncTimer  = null;
+let _mpGameTimer  = null;
+let _mpTimeLeft   = 60;
+let _mpMyScore    = 0;
+let _mpPlayersSnapshot = {};
+
+// ── Bird colors for each player slot ──
+const PLAYER_COLORS = [
+  { body:'#5db8e8', wing:'#3a8fb5', glow:'rgba(93,184,232,.6)', label:'#5db8e8' },
+  { body:'#7ec87e', wing:'#4a9e4a', glow:'rgba(126,200,126,.6)', label:'#7ec87e' },
+  { body:'#e8a06a', wing:'#b56e3a', glow:'rgba(232,160,106,.6)', label:'#e8a06a' },
+  { body:'#c4aaff', wing:'#9b7fd4', glow:'rgba(196,170,255,.6)', label:'#c4aaff' },
+  { body:'#e88fa0', wing:'#c05070', glow:'rgba(232,143,160,.6)', label:'#e88fa0' },
+  { body:'#e8c87a', wing:'#b59a40', glow:'rgba(232,200,122,.6)', label:'#e8c87a' },
+  { body:'#70d4d4', wing:'#3a9898', glow:'rgba(112,212,212,.6)', label:'#70d4d4' },
+  { body:'#ff9980', wing:'#cc5533', glow:'rgba(255,153,128,.6)', label:'#ff9980' },
+];
+
+// ── Unique player ID ──
+function _getMpUid() {
+  if (_mpUid) return _mpUid;
+  // Prefer signed-in user uid
+  if (window._fbUid) { _mpUid = window._fbUid; return _mpUid; }
+  // Otherwise generate/restore from localStorage
+  let uid = localStorage.getItem('mp_uid');
+  if (!uid) { uid = 'mp_' + Math.random().toString(36).slice(2,12); localStorage.setItem('mp_uid',uid); }
+  _mpUid = uid;
+  return uid;
+}
+
+// ── Generate room code ──
+function _genCode() {
+  const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let c=''; for(let i=0;i<6;i++) c+=chars[Math.floor(Math.random()*chars.length)];
+  return c;
+}
+
+// ── DOM helpers ──
+const $mp = id => document.getElementById(id);
+function _mpStatus(msg, type='info') {
+  const el = $mp('mp-status-msg'); if(!el) return;
+  el.style.display = 'block';
+  el.style.background = type==='error' ? 'rgba(232,143,160,.12)' : type==='ok' ? 'rgba(126,200,126,.12)' : 'rgba(93,184,232,.10)';
+  el.style.border = type==='error' ? '1px solid rgba(232,143,160,.3)' : type==='ok' ? '1px solid rgba(126,200,126,.3)' : '1px solid rgba(93,184,232,.2)';
+  el.style.color = type==='error' ? '#e88fa0' : type==='ok' ? '#7ec87e' : '#5db8e8';
+  el.textContent = msg;
+}
+function _mpClearStatus() { const el=$mp('mp-status-msg'); if(el) el.style.display='none'; }
+
+// ── OPEN LOBBY ──
+window._openMultiplayerLobby = function() {
+  _getMpUid();
+  // Pre-fill name from profile if available
+  const savedName = window._fbName || SAVE?.playerName || localStorage.getItem('mp_name') || '';
+  const nameInp = $mp('mp-name-inp');
+  if (nameInp && savedName) nameInp.value = savedName;
+  $mp('mp-lobby-screen').classList.remove('hidden');
+  _mpClearStatus();
+  _resetLobbyUI();
+};
+
+window._closeMultiplayerLobby = function() {
+  $mp('mp-lobby-screen').classList.add('hidden');
+  if (_mpRoomId) window._mpLeaveRoom();
+};
+
+function _resetLobbyUI() {
+  $mp('mp-create-panel').style.display  = 'none';
+  $mp('mp-join-panel').style.display    = 'none';
+  $mp('mp-waiting-room').style.display  = 'none';
+  $mp('mp-step-name').style.display     = 'block';
+}
+
+// ── Duration selector ──
+window._mpSelDur = function(dur, btn) {
+  _mpDuration = dur;
+  document.querySelectorAll('.mp-dur-btn').forEach(b => {
+    b.style.background = 'transparent';
+    b.style.borderColor = 'rgba(170,68,255,.2)';
+    b.style.color = 'rgba(196,170,255,.5)';
+  });
+  btn.style.background = 'rgba(170,68,255,.18)';
+  btn.style.borderColor = 'rgba(170,68,255,.4)';
+  btn.style.color = '#c4aaff';
+};
+
+// ── CREATE flow ──
+window._mpCreate = function() {
+  _mpClearStatus();
+  const name = ($mp('mp-name-inp').value || '').trim();
+  if (!name) { _mpStatus('Please enter your display name first.','error'); return; }
+  _mpName = name;
+  localStorage.setItem('mp_name', name);
+  $mp('mp-step-name').style.display  = 'none';
+  $mp('mp-create-panel').style.display = 'block';
+};
+
+window._mpConfirmCreate = async function() {
+  _mpClearStatus();
+  const pw = ($mp('mp-create-pw').value||'').trim();
+  const code = _genCode();
+  _mpRoomId = code;
+  _mpIsHost = true;
+  const uid = _getMpUid();
+
+  const roomRef = doc(_mpDb, 'mp_rooms', code);
+  const slotIdx = 0;
+  const playerColors = PLAYER_COLORS[slotIdx];
+
+  try {
+    await setDoc(roomRef, {
+      code,
+      hostUid: uid,
+      password: pw || null,
+      duration: _mpDuration,
+      state: 'waiting',
+      createdAt: Date.now(),
+      players: {
+        [uid]: {
+          name: _mpName,
+          score: 0,
+          alive: true,
+          progress: 0,
+          slotIdx,
+          colorBody: playerColors.body,
+          colorLabel: playerColors.label,
+          lastSeen: Date.now(),
+        }
+      }
+    });
+    _showWaitingRoom(code, true);
+    _subscribeRoom(code);
+  } catch(e) {
+    _mpStatus('Failed to create room. Check connection.','error');
+    console.error('[MP]',e);
+  }
+};
+
+// ── JOIN flow ──
+window._mpJoinFlow = function() {
+  _mpClearStatus();
+  const name = ($mp('mp-name-inp').value || '').trim();
+  if (!name) { _mpStatus('Please enter your display name first.','error'); return; }
+  _mpName = name;
+  localStorage.setItem('mp_name', name);
+  $mp('mp-step-name').style.display = 'none';
+  $mp('mp-join-panel').style.display = 'block';
+};
+
+window._mpConfirmJoin = async function() {
+  _mpClearStatus();
+  const code = ($mp('mp-join-code').value||'').trim().toUpperCase();
+  const pw   = ($mp('mp-join-pw').value||'').trim();
+  if (!code || code.length !== 6) { _mpStatus('Please enter a valid 6-character room code.','error'); return; }
+
+  _mpStatus('Finding room…');
+  const roomRef = doc(_mpDb, 'mp_rooms', code);
+  let snap;
+  try { snap = await getDoc(roomRef); } catch(e) { _mpStatus('Connection error. Try again.','error'); return; }
+
+  if (!snap.exists()) { _mpStatus('Room not found. Check the code.','error'); return; }
+  const data = snap.data();
+  if (data.state !== 'waiting') { _mpStatus('This room has already started. Too late!','error'); return; }
+  if (data.password && data.password !== pw) { _mpStatus('Wrong password. Try again.','error'); return; }
+
+  const players = data.players || {};
+  const playerCount = Object.keys(players).length;
+  if (playerCount >= 8) { _mpStatus('Room is full (8/8 players).','error'); return; }
+
+  const uid = _getMpUid();
+  if (players[uid]) { _mpStatus('You are already in this room!','info'); _mpRoomId=code; _mpIsHost=(data.hostUid===uid); _showWaitingRoom(code,_mpIsHost); _subscribeRoom(code); return; }
+
+  const slotIdx = playerCount;
+  const playerColors = PLAYER_COLORS[slotIdx % PLAYER_COLORS.length];
+
+  const update = {};
+  update[`players.${uid}`] = {
+    name: _mpName, score:0, alive:true, progress:0,
+    slotIdx, colorBody: playerColors.body, colorLabel: playerColors.label,
+    lastSeen: Date.now(),
+  };
+
+  try {
+    await updateDoc(roomRef, update);
+    _mpRoomId = code;
+    _mpIsHost = false;
+    _showWaitingRoom(code, false);
+    _subscribeRoom(code);
+    _mpClearStatus();
+  } catch(e) {
+    _mpStatus('Failed to join. Try again.','error');
+    console.error('[MP]',e);
+  }
+};
+
+// ── Copy code ──
+window._mpCopyCode = function() {
+  if (!_mpRoomId) return;
+  navigator.clipboard.writeText(_mpRoomId).then(() => {
+    if (typeof showToast === 'function') showToast('📋 Room code copied: ' + _mpRoomId);
+  }).catch(() => {
+    if (typeof showToast === 'function') showToast('Room code: ' + _mpRoomId);
+  });
+};
+
+// ── Show waiting room ──
+function _showWaitingRoom(code, isHost) {
+  $mp('mp-create-panel').style.display = 'none';
+  $mp('mp-join-panel').style.display   = 'none';
+  $mp('mp-step-name').style.display    = 'none';
+  $mp('mp-waiting-room').style.display = 'block';
+  $mp('mp-room-code-display').textContent = code;
+  $mp('mp-host-controls').style.display  = isHost ? 'block' : 'none';
+  $mp('mp-guest-waiting').style.display  = isHost ? 'none' : 'block';
+}
+
+// ── Subscribe to room updates ──
+function _subscribeRoom(code) {
+  if (_mpUnsubRoom) { _mpUnsubRoom(); _mpUnsubRoom = null; }
+  const roomRef = doc(_mpDb, 'mp_rooms', code);
+  _mpUnsubRoom = onSnapshot(roomRef, snap => {
+    if (!snap.exists()) { _mpStatus('Room was deleted.','error'); _mpLeaveCleanup(); return; }
+    const data = snap.data();
+    _mpRoomData = data;
+    _mpPlayersSnapshot = data.players || {};
+
+    if (data.state === 'waiting') {
+      _renderLobbyPlayers(data.players || {});
+    } else if (data.state === 'playing' && !_mpGameActive) {
+      _startMpGame(data);
+    } else if (data.state === 'ended' && _mpGameActive) {
+      _endMpGame(data.players || {});
+    }
+  }, err => { console.warn('[MP] snapshot err:', err); });
+}
+
+// ── Render lobby players list ──
+function _renderLobbyPlayers(players) {
+  const list = $mp('mp-player-list'); if (!list) return;
+  list.innerHTML = '';
+  const uid = _getMpUid();
+  const entries = Object.entries(players);
+  $mp('mp-player-count').textContent = `(${entries.length}/8)`;
+
+  entries.forEach(([puid, p]) => {
+    const isMe = puid === uid;
+    const isHost = _mpRoomData && puid === _mpRoomData.hostUid;
+    const el = document.createElement('div');
+    el.style.cssText = `display:flex;align-items:center;gap:.55rem;padding:.38rem .5rem;
+      border-radius:7px;background:${isMe?'rgba(170,68,255,.1)':'rgba(255,255,255,.03)'};
+      border:1px solid ${isMe?'rgba(170,68,255,.25)':'rgba(255,255,255,.07)'};`;
+    el.innerHTML = `
+      <div style="width:8px;height:8px;border-radius:50%;background:${p.colorBody||'#5db8e8'};flex-shrink:0;box-shadow:0 0 6px ${p.colorBody||'#5db8e8'};"></div>
+      <div style="font-family:'Raleway',sans-serif;font-size:.78rem;font-weight:700;color:${isMe?'#c4aaff':'rgba(200,215,255,.75)'};flex:1;">
+        ${p.name}${isHost?' <span style="font-size:.55rem;color:#e8c87a;background:rgba(232,200,122,.1);border:1px solid rgba(232,200,122,.2);padding:.05rem .3rem;border-radius:4px;margin-left:.3rem;">HOST</span>':''}
+        ${isMe?' <span style="font-size:.55rem;color:#c4aaff;background:rgba(170,68,255,.1);border:1px solid rgba(170,68,255,.2);padding:.05rem .3rem;border-radius:4px;margin-left:.2rem;">YOU</span>':''}
+      </div>
+      <div style="width:7px;height:7px;border-radius:50%;background:#7ec87e;animation:mpPulse 1.4s ease infinite;"></div>
+    `;
+    list.appendChild(el);
+  });
+
+  // Enable start button only if ≥2 players (but allow solo test)
+  const startBtn = $mp('mp-start-btn');
+  if (startBtn) {
+    const canStart = entries.length >= 1;
+    startBtn.style.opacity = canStart ? '1' : '0.45';
+    startBtn.style.pointerEvents = canStart ? 'auto' : 'none';
+  }
+}
+
+// ── HOST: start the game ──
+window._mpHostStart = async function() {
+  if (!_mpRoomId || !_mpIsHost) return;
+  const roomRef = doc(_mpDb, 'mp_rooms', _mpRoomId);
+  await updateDoc(roomRef, {
+    state: 'playing',
+    startTime: Date.now(),
+    duration: _mpDuration,
+  });
+  // onSnapshot will fire and trigger _startMpGame for all clients
+};
+
+// ── Start multiplayer game ──
+function _startMpGame(data) {
+  _mpGameActive = true;
+  _mpMyScore = 0;
+  const startTime = data.startTime || Date.now();
+  _mpDuration = data.duration || 60;
+  _mpTimeLeft = Math.max(0, _mpDuration - Math.floor((Date.now() - startTime) / 1000));
+
+  // Hide lobby
+  $mp('mp-lobby-screen').classList.add('hidden');
+
+  // Store ref so game can end later
+  window._mpRoomRef = doc(_mpDb, 'mp_rooms', _mpRoomId);
+  window._mpMyUid   = _getMpUid();
+  window._mpPlayers = data.players || {};
+
+  // Patch into the existing game engine
+  // Set mode so game knows this is multiplayer
+  window._mpMode = 'multiplayer_race';
+
+  // Show MP HUD
+  $mp('mp-race-hud').style.display = 'block';
+  _updateMpHud(data.players || {}, _mpTimeLeft);
+
+  // Launch game with sprint-like mode (60/90/120 second timer)
+  window.selMode = 'sprint';
+  window.selDiff = window.selDiff || 'easy';
+
+  // Override the sprint end time to match room's startTime + duration
+  // We'll patch it after startGame initializes G
+  const _origLaunch = window.launchGame;
+
+  // Directly call startGame path
+  const gs = document.getElementById('game-screen');
+  if (gs) gs.classList.remove('hidden');
+  document.querySelectorAll('.screen').forEach(s => {
+    if (s.id !== 'game-screen') s.classList.add('hidden');
+  });
+
+  // Use the existing countdown + startGame
+  if (typeof window.show === 'function') window.show('game-screen');
+  if (typeof window.countdown === 'function') {
+    window.countdown(() => {
+      if (typeof window.startGame === 'function') {
+        window.startGame();
+        // Override sprint time to sync with server
+        if (window.G) {
+          window.G.sprintEnd = startTime + _mpDuration * 1000;
+          window.G.mode = 'sprint'; // still use sprint physics
+          window.G._isMpRace = true; // flag for our hooks
+          // Track score changes
+          _setupMpScoreHook();
+        }
+      }
+    });
+  }
+
+  // Start countdown timer
+  _startMpTimer(startTime);
+
+  // Live sync every 500ms
+  _mpSyncTimer = setInterval(_syncMpScore, 500);
+}
+
+// ── Score sync hook: patch completeWord ──
+function _setupMpScoreHook() {
+  // We listen to G.score changes each sync tick — no need to patch
+  // Just capture scores in _syncMpScore
+}
+
+// ── Sync local score to Firestore ──
+async function _syncMpScore() {
+  if (!_mpGameActive || !window._mpRoomRef || !window._mpMyUid) return;
+  const score = (window.G && window.G.score) ? Math.floor(window.G.score) : 0;
+  const words  = (window.G && window.G.words)  ? window.G.words : 0;
+  const alive  = (window.G && window.G.bird)   ? window.G.bird.alive : true;
+  const progress = window._mpMaxScore ? Math.min(1, score / window._mpMaxScore) : score / 5000;
+
+  _mpMyScore = score;
+
+  try {
+    const upd = {};
+    upd[`players.${window._mpMyUid}.score`]    = score;
+    upd[`players.${window._mpMyUid}.words`]     = words;
+    upd[`players.${window._mpMyUid}.alive`]     = alive;
+    upd[`players.${window._mpMyUid}.progress`]  = progress;
+    upd[`players.${window._mpMyUid}.lastSeen`]  = Date.now();
+    await updateDoc(window._mpRoomRef, upd);
+  } catch(e) {}
+}
+
+// ── Timer ──
+function _startMpTimer(startTime) {
+  if (_mpGameTimer) clearInterval(_mpGameTimer);
+  _mpGameTimer = setInterval(() => {
+    _mpTimeLeft = Math.max(0, _mpDuration - Math.floor((Date.now() - startTime) / 1000));
+    _updateMpTimerHud(_mpTimeLeft);
+    // Update HUD with latest player data from snapshot
+    _updateMpHud(_mpPlayersSnapshot, _mpTimeLeft);
+    if (_mpTimeLeft <= 0) {
+      clearInterval(_mpGameTimer); _mpGameTimer = null;
+      _onMpTimeUp();
+    }
+  }, 1000);
+}
+
+function _onMpTimeUp() {
+  // Final sync
+  _syncMpScore();
+  if (_mpIsHost) {
+    // Host writes ended state
+    setTimeout(async () => {
+      if (!window._mpRoomRef) return;
+      try {
+        await updateDoc(window._mpRoomRef, { state: 'ended' });
+      } catch(e) {}
+    }, 600);
+  }
+  // Local game ends via G.sprintEnd expiry — it will call triggerDeath naturally
+  // We just watch for it and redirect to mp end screen
+  setTimeout(() => {
+    if (_mpGameActive) _endMpGame(_mpPlayersSnapshot);
+  }, 2000);
+}
+
+// ── Update timer display ──
+function _updateMpTimerHud(t) {
+  const el = $mp('mp-hud-timer'); if (!el) return;
+  const mins = Math.floor(t/60), secs = t%60;
+  el.textContent = mins + ':' + String(secs).padStart(2,'0');
+  el.style.color = t <= 10 ? '#e88fa0' : t <= 20 ? '#e8c87a' : '#7ec87e';
+}
+
+// ── Update race HUD leaderboard ──
+function _updateMpHud(players, timeLeft) {
+  const hud = $mp('mp-hud-players'); if (!hud) return;
+  const myUid = _getMpUid();
+  const sorted = Object.entries(players).sort(([,a],[,b]) => (b.score||0)-(a.score||0));
+
+  hud.innerHTML = '';
+  sorted.slice(0,8).forEach(([uid, p], i) => {
+    const isMe = uid === myUid;
+    const rank = ['🥇','🥈','🥉'][i] || `#${i+1}`;
+    const score = (p.score||0).toLocaleString();
+    const el = document.createElement('div');
+    el.style.cssText = `display:flex;align-items:center;gap:.4rem;padding:.2rem .3rem;
+      border-radius:6px;background:${isMe?'rgba(170,68,255,.12)':'transparent'};
+      border:1px solid ${isMe?'rgba(170,68,255,.2)':'transparent'};`;
+    el.innerHTML = `
+      <div style="font-size:.65rem;width:1.4rem;text-align:center;flex-shrink:0;">${rank}</div>
+      <div style="width:7px;height:7px;border-radius:50%;background:${p.colorBody||'#5db8e8'};flex-shrink:0;"></div>
+      <div style="font-family:'Raleway',sans-serif;font-size:.65rem;font-weight:700;
+        color:${isMe?'#c4aaff':(p.colorLabel||'rgba(200,215,255,.7)')};flex:1;
+        overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.name}${isMe?' ◀':''}</div>
+      <div style="font-family:'DM Mono',monospace;font-size:.65rem;font-weight:700;
+        color:${isMe?'#c4aaff':'rgba(200,215,255,.55)'};white-space:nowrap;">${score}</div>
+    `;
+    hud.appendChild(el);
+  });
+}
+
+// ── End game ──
+function _endMpGame(players) {
+  if (!_mpGameActive) return;
+  _mpGameActive = false;
+
+  // Stop timers
+  if (_mpGameTimer) { clearInterval(_mpGameTimer); _mpGameTimer = null; }
+  if (_mpSyncTimer) { clearInterval(_mpSyncTimer);  _mpSyncTimer = null; }
+
+  // Do final sync
+  _syncMpScore();
+
+  // Hide race HUD
+  $mp('mp-race-hud').style.display = 'none';
+
+  // Wait a moment for all scores to settle then show end screen
+  setTimeout(() => {
+    _showMpEndScreen(players);
+  }, 800);
+}
+
+// ── End screen ──
+function _showMpEndScreen(players) {
+  // Force-end game locally if still running
+  if (window.running) {
+    window.running = false;
+    if (window.rafId) { cancelAnimationFrame(window.rafId); window.rafId = null; }
+  }
+
+  const myUid = _getMpUid();
+  const sorted = Object.entries(players||_mpPlayersSnapshot).sort(([,a],[,b])=>(b.score||0)-(a.score||0));
+  const myRank = sorted.findIndex(([uid]) => uid===myUid) + 1;
+
+  // Trophy
+  const trophy = myRank===1?'🏆':myRank===2?'🥈':myRank===3?'🥉':'🎮';
+  const title  = myRank===1?'YOU WIN! 🎉':myRank===2?'2ND PLACE!':myRank===3?'3RD PLACE!':'RACE OVER';
+  $mp('mp-end-trophy').textContent = trophy;
+  $mp('mp-end-title').textContent  = title;
+
+  const lb = $mp('mp-end-leaderboard'); if(!lb) return;
+  lb.innerHTML='';
+  const medals=['🥇','🥈','🥉'];
+
+  sorted.forEach(([uid,p],i) => {
+    const isMe = uid===myUid;
+    const el = document.createElement('div');
+    el.style.cssText = `display:flex;align-items:center;gap:.6rem;padding:.5rem .7rem;
+      border-radius:9px;
+      background:${isMe?'rgba(170,68,255,.12)':'rgba(255,255,255,.04)'};
+      border:1px solid ${isMe?'rgba(170,68,255,.3)':'rgba(255,255,255,.07)'};`;
+    el.innerHTML = `
+      <div style="font-size:1.1rem;width:1.6rem;text-align:center;">${medals[i]||('#'+(i+1))}</div>
+      <div style="width:10px;height:10px;border-radius:50%;background:${p.colorBody||'#5db8e8'};box-shadow:0 0 6px ${p.colorBody||'#5db8e8'};flex-shrink:0;"></div>
+      <div style="font-family:'Raleway',sans-serif;font-size:.82rem;font-weight:700;
+        color:${isMe?'#c4aaff':'rgba(200,215,255,.8)'};flex:1;text-align:left;">
+        ${p.name}${isMe?' <span style="font-size:.55rem;color:#c4aaff;background:rgba(170,68,255,.15);border:1px solid rgba(170,68,255,.25);padding:.04rem .28rem;border-radius:4px;margin-left:.3rem;">YOU</span>':''}
+      </div>
+      <div style="font-family:'DM Mono',monospace;font-size:.88rem;font-weight:700;
+        color:${i===0?'#e8c87a':i===1?'#b0b8c8':i===2?'#cd7f32':'rgba(200,215,255,.6)'};white-space:nowrap;">
+        ${(p.score||0).toLocaleString()}
+      </div>
+    `;
+    lb.appendChild(el);
+  });
+
+  // Show end screen
+  document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
+  $mp('mp-end-screen').classList.remove('hidden');
+}
+
+// ── Play again (go back to lobby) ──
+window._mpPlayAgain = function() {
+  $mp('mp-end-screen').classList.add('hidden');
+  if (_mpRoomId) {
+    // Reopen lobby if room still exists
+    _mpGameActive = false;
+    $mp('mp-lobby-screen').classList.remove('hidden');
+    _showWaitingRoom(_mpRoomId, _mpIsHost);
+    // Reset scores in Firestore if host
+    if (_mpIsHost && window._mpRoomRef) {
+      const upd = { state:'waiting' };
+      const players = _mpPlayersSnapshot;
+      Object.keys(players).forEach(uid => {
+        upd[`players.${uid}.score`]    = 0;
+        upd[`players.${uid}.progress`] = 0;
+        upd[`players.${uid}.alive`]    = true;
+      });
+      updateDoc(window._mpRoomRef, upd).catch(()=>{});
+    }
+  } else {
+    _mpBackToMenu();
+  }
+};
+
+// ── Back to menu ──
+window._mpBackToMenu = function() {
+  $mp('mp-end-screen').classList.add('hidden');
+  _mpLeaveCleanup();
+  document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
+  if (typeof window.show === 'function') window.show('menu-screen');
+  if (typeof window.refreshMenuStats === 'function') window.refreshMenuStats();
+  if (typeof window.playLobbyBGM === 'function') window.playLobbyBGM();
+};
+
+// ── Leave room ──
+window._mpLeaveRoom = function() {
+  if (_mpRoomId) {
+    const uid = _getMpUid();
+    const roomRef = doc(_mpDb, 'mp_rooms', _mpRoomId);
+    // Remove player from room
+    const upd = {};
+    upd[`players.${uid}`] = deleteField();
+    updateDoc(roomRef, upd).catch(()=>{});
+  }
+  _mpLeaveCleanup();
+  _resetLobbyUI();
+  $mp('mp-lobby-screen').classList.add('hidden');
+};
+
+function _mpLeaveCleanup() {
+  if (_mpUnsubRoom) { _mpUnsubRoom(); _mpUnsubRoom = null; }
+  if (_mpGameTimer)  { clearInterval(_mpGameTimer); _mpGameTimer = null; }
+  if (_mpSyncTimer)  { clearInterval(_mpSyncTimer);  _mpSyncTimer = null; }
+  _mpRoomId     = null;
+  _mpIsHost     = false;
+  _mpGameActive = false;
+  _mpRoomData   = null;
+  _mpPlayersSnapshot = {};
+  window._mpRoomRef = null;
+  window._mpMode    = null;
+  $mp('mp-race-hud').style.display = 'none';
+}
+
+// ── Inject pulse animation CSS ──
+const mpStyle = document.createElement('style');
+mpStyle.textContent = `
+@keyframes mpPulse {
+  0%,100%{opacity:1;transform:scale(1);}
+  50%{opacity:.4;transform:scale(.7);}
+}
+#mp-lobby-screen.hidden,
+#mp-end-screen.hidden {
+  display:none !important;
+}
+`;
+document.head.appendChild(mpStyle);
+
+console.log('[MP] Multiplayer engine loaded ✓');
 
 })();
 </script>
